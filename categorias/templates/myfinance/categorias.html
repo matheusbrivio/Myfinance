@@ -1,0 +1,28 @@
+{% extends "myfinance/base.html" %}
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h2 mb-0">{{ titulo }}</h1>
+  <a class="btn btn-primary" href="{% url 'categorias:nova' %}">Nova categoria</a>
+</div>
+{% if categorias %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead><tr><th scope="col">Nome</th><th scope="col">Descrição</th><th scope="col">Ações</th></tr></thead>
+    <tbody>
+      {% for categoria in categorias %}
+      <tr>
+        <td class="text-break">{{ categoria.nome }}</td>
+        <td class="text-break">{{ categoria.descricao|default:"—" }}</td>
+        <td><div class="d-flex gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'categorias:editar' categoria.pk %}">Editar</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'categorias:excluir' categoria.pk %}">Excluir</a>
+        </div></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>Nenhuma categoria cadastrada.</p>
+{% endif %}
+{% endblock %}

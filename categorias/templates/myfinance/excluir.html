@@ -1,0 +1,29 @@
+{% extends "myfinance/base.html" %}
+{% load static %}
+{% block conteudo %}
+<h1 class="h2 text-break">{{ titulo }}</h1>
+{% if erro %}
+  <p class="alert alert-warning" role="alert">{{ erro }}</p>
+  <a class="btn btn-outline-secondary" href="{% url retorno %}">Voltar</a>
+{% else %}
+  {% with acao=confirmacao|default:"Confirmar exclusão" %}
+    <p class="text-break">{% if pergunta %}{{ pergunta }}{% else %}Confirma a exclusão de “{{ objeto }}”?{% endif %}</p>
+    <button hidden class="btn btn-danger" type="button" data-abrir-confirmacao>Reabrir confirmação</button>
+    <a class="btn btn-outline-secondary" href="{% url retorno %}">Cancelar</a>
+      <form method="post" class="mt-3" data-confirmacao-fallback>
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">{{ acao }}</button>
+      </form>
+    <dialog class="confirmacao" aria-labelledby="titulo-confirmacao">
+      <h2 class="h4" id="titulo-confirmacao">{{ titulo }}</h2>
+      <p class="text-break">{% if pergunta %}{{ pergunta }}{% else %}Confirma a exclusão de “{{ objeto }}”?{% endif %}</p>
+      <form method="post" class="d-flex flex-wrap gap-2">
+        {% csrf_token %}
+        <button autofocus class="btn btn-outline-secondary" type="button" data-fechar-confirmacao>Voltar</button>
+        <button class="btn btn-danger" type="submit">{{ acao }}</button>
+      </form>
+    </dialog>
+    <script defer src="{% static 'myfinance/confirmacao.js' %}"></script>
+  {% endwith %}
+{% endif %}
+{% endblock %}

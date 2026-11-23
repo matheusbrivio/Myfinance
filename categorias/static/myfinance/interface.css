@@ -1,0 +1,113 @@
+body {
+  --bs-font-sans-serif: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --bs-body-color: #14273b;
+}
+
+.myfinance-header {
+  background: #14273b;
+  color: #fff;
+}
+
+.myfinance-header a {
+  border-radius: .55rem;
+  color: #e0edf9;
+  padding: .4rem .55rem;
+  text-decoration: none;
+}
+
+.myfinance-header a:hover,
+.myfinance-header a[aria-current="page"] {
+  background: #30485f;
+  color: #fff;
+}
+
+.card {
+  border-color: #dce5ed;
+  border-radius: 1rem;
+  box-shadow: 0 .2rem .85rem rgb(20 39 59 / .07);
+  min-width: 0;
+}
+
+.saldo-principal {
+  background: #164c40;
+  border-color: #164c40;
+  color: #fff;
+}
+
+.btn-primary {
+  --bs-btn-bg: #176552;
+  --bs-btn-border-color: #176552;
+  --bs-btn-hover-bg: #114e40;
+  --bs-btn-hover-border-color: #114e40;
+  --bs-btn-active-bg: #0f473a;
+  --bs-btn-active-border-color: #0f473a;
+  --bs-btn-disabled-bg: #176552;
+  --bs-btn-disabled-border-color: #176552;
+}
+
+.progress {
+  height: .55rem;
+}
+
+.progress-bar {
+  background: #177a62;
+  transform-origin: left;
+  animation: preencher .45s ease-out both;
+}
+
+@keyframes preencher {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.calendario {
+  max-width: 24rem;
+}
+
+.calendario-grade {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: .25rem;
+  text-align: center;
+}
+
+dialog.confirmacao {
+  border: 1px solid #dce5ed;
+  border-radius: 1rem;
+  width: min(calc(100% - 2rem), 34rem);
+  padding: 1.5rem;
+  box-shadow: 0 .5rem 2rem rgb(20 39 59 / .2);
+  transition: opacity .18s ease, transform .18s ease, display .18s allow-discrete, overlay .18s allow-discrete;
+  opacity: 0;
+  transform: translateY(.4rem);
+}
+
+dialog.confirmacao:not([open]) {
+  pointer-events: none;
+}
+
+dialog.confirmacao[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  dialog.confirmacao[open] { opacity: 0; transform: translateY(.4rem); }
+}
+
+dialog.confirmacao::backdrop {
+  background: rgb(20 39 59 / .5);
+}
+
+:focus-visible {
+  outline: 3px solid #ce791d;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}

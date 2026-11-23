@@ -1,0 +1,22 @@
+{% extends "myfinance/base.html" %}
+{% block conteudo %}
+<div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+  <h1 class="h2">Metas</h1>
+  <a class="btn btn-primary" href="{% url 'metas:nova' %}">Nova meta</a>
+</div>
+<ul class="list-group mb-4">
+  {% for meta in metas %}
+  <li class="list-group-item text-break"><a href="{% url 'metas:detalhe' meta.pk %}">{{ meta.nome }}</a></li>
+  {% empty %}
+  <li class="list-group-item">Nenhuma meta ativa.</li>
+  {% endfor %}
+</ul>
+{% if arquivadas %}
+<h2 class="h5">Metas arquivadas</h2>
+<ul class="list-group">
+  {% for meta in arquivadas %}
+  <li class="list-group-item text-break"><a href="{% url 'metas:detalhe' meta.pk %}">{{ meta.nome }}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

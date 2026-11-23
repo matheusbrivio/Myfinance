@@ -1,0 +1,32 @@
+{% extends "myfinance/base.html" %}
+{% load financeiro %}
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h2 mb-0">{{ titulo }}</h1>
+  <a class="btn btn-primary" href="{% url 'transacoes:nova' %}">Nova transação</a>
+</div>
+{% if transacoes %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead><tr><th scope="col">Descrição</th><th scope="col">Valor</th><th scope="col">Tipo</th><th scope="col">Data</th><th scope="col">Categoria</th><th scope="col">Ações</th></tr></thead>
+    <tbody>
+      {% for transacao in transacoes %}
+      <tr>
+        <td class="text-break">{{ transacao }}</td>
+        <td class="text-nowrap">{{ transacao.valor|moeda_decimal }}</td>
+        <td>{{ transacao.get_tipo_display }}</td>
+        <td class="text-nowrap">{{ transacao.data|date:"d/m/Y" }}</td>
+        <td class="text-break">{{ transacao.categoria.nome|default:"Sem categoria" }}</td>
+        <td>{% if transacao.convencional %}<div class="d-flex gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'transacoes:editar' transacao.pk %}">Editar</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'transacoes:excluir' transacao.pk %}">Excluir</a>
+        </div>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>Nenhuma transação cadastrada.</p>
+{% endif %}
+{% endblock %}

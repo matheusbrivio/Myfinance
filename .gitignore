@@ -1,0 +1,17 @@
+# Ambientes locais e cache Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Banco local, backups e arquivos auxiliares do SQLite
+*.sqlite3*
+
+# Configuração local
+.env
+.env.*
+!.env.example
+
+# Dependências e build gerado
+node_modules/
+/frontend/dist/

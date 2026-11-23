@@ -1,0 +1,38 @@
+{% extends "myfinance/base.html" %}
+{% load financeiro %}
+{% block conteudo %}
+<h1 class="h2 text-break">{{ meta.nome }}</h1>
+{% if meta.descricao %}<p class="text-break">{{ meta.descricao }}</p>{% endif %}
+<p>Criada em {{ meta.criada_em|date:"d/m/Y" }} · Data limite {{ meta.prazo|date:"d/m/Y" }}</p>
+<p>Objetivo {{ meta.objetivo|moeda_decimal }} · Acumulado {{ saldo|moeda }}</p>
+<div class="mb-3">{% include "myfinance/progresso.html" %}</div>
+<dl class="row">
+  <dt class="col-sm-4">Valor restante</dt><dd class="col-sm-8">{{ progresso.restante|moeda }}</dd>
+  <dt class="col-sm-4">Dias restantes</dt><dd class="col-sm-8">{{ progresso.dias }}</dd>
+  <dt class="col-sm-4">Aporte mensal necessário</dt>
+  <dd class="col-sm-8">{% if progresso.mensal is None %}Indisponível{% else %}{{ progresso.mensal|moeda }}{% endif %}</dd>
+</dl>
+{% if meta.arquivada_em %}
+  <p>Meta arquivada.</p>
+{% else %}
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-primary" href="{% url 'metas:aportar' meta.pk %}">Fazer aporte</a>
+    {% if saldo > 0 %}<a class="btn btn-outline-primary" href="{% url 'metas:retirar' meta.pk %}">Retirar</a>{% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'metas:editar' meta.pk %}">Editar</a>
+    <a class="btn btn-outline-danger" href="{% url 'metas:excluir' meta.pk %}">{% if historico %}Encerrar{% else %}Excluir{% endif %}</a>
+  </div>
+{% endif %}
+<h2 class="h5">Histórico da meta</h2>
+{% if historico %}
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th scope="col">Tipo</th><th scope="col">Valor</th><th scope="col">Data e hora</th><th scope="col">Saldo após movimentação</th></tr></thead>
+    <tbody>
+      {% for transacao, acumulado in historico %}
+      <tr><td>{{ transacao.get_tipo_display }}</td><td>{{ transacao.valor|moeda_decimal }}</td><td>{{ transacao.instante|date:"d/m/Y H:i" }}</td><td>{{ acumulado|moeda }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}<p>Nenhuma movimentação registrada.</p>{% endif %}
+{% endblock %}

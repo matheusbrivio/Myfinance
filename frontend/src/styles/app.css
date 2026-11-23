@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --color-base: #0b1019;
+  --color-panel: #141c2a;
+  --color-line: #2a374b;
+  --color-muted: #a9b7ca;
+  --color-accent: #83c9ff;
+  --color-good: #72e0a9;
+  --color-bad: #ff9a99;
+}
+:root { color-scheme: dark; }
+body { margin: 0; min-width: 0; background: var(--color-base); color: #f3f6fa; }
+.break-words { overflow-wrap: anywhere; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+a, button, input, select, textarea { transition: background-color .16s, border-color .16s, color .16s; }
+.dialogo[data-state="open"], .dialogo-fundo[data-state="open"] { animation: aparecer .16s ease-out; }
+.dialogo[data-state="closed"], .dialogo-fundo[data-state="closed"], .aviso[data-state="closed"] { animation: sair .16s ease-in both; }
+.aviso[data-state="open"] { animation: aparecer .16s ease-out; }
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sair { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
+}

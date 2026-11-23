@@ -1,0 +1,22 @@
+{% extends "myfinance/base.html" %}
+{% load static %}
+{% block conteudo %}
+<h1 class="h2 mb-4">{{ titulo }}</h1>
+<form method="post" class="card card-body mx-0" style="max-width: 42rem">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for campo in form %}
+    <div class="mb-3">
+      {{ campo.label_tag }}
+      {{ campo }}
+      {% if campo.help_text %}<div class="form-text" id="{{ campo.auto_id }}_helptext">{{ campo.help_text }}</div>{% endif %}
+      {% if campo.errors %}<div class="text-danger">{{ campo.errors }}</div>{% endif %}
+    </div>
+  {% endfor %}
+  <div class="d-flex flex-wrap gap-2">
+    <button class="btn btn-primary" type="submit">Salvar</button>
+    <a class="btn btn-outline-secondary" href="{% url retorno %}">Cancelar</a>
+  </div>
+</form>
+<script defer src="{% static 'myfinance/calendario.js' %}"></script>
+{% endblock %}

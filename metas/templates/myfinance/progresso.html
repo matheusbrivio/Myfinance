@@ -1,0 +1,7 @@
+<div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+  <span>{{ progresso.status }}</span>
+  <strong>{{ progresso.percentual }}%</strong>
+</div>
+<div class="progress" role="progressbar" aria-label="Progresso da meta" aria-valuenow="{{ progresso.barra }}" aria-valuemin="0" aria-valuemax="100">
+  <div class="progress-bar" style="width: {{ progresso.barra }}%"></div>
+</div>

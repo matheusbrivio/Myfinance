@@ -1,0 +1,91 @@
+{% extends "myfinance/base.html" %}
+{% load financeiro static %}
+{% block conteudo %}
+<h1 class="display-6 fw-semibold mb-4">Visão geral</h1>
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-4">
+    <section class="card h-100 saldo-principal"><div class="card-body">
+      <h2 class="h6"><span aria-hidden="true">◇</span> Saldo disponível</h2><p class="h3 mb-0 text-break">{{ resumo.disponivel|moeda }}</p>
+    </div></section>
+  </div>
+  <div class="col-12 col-md-4">
+    <section class="card h-100"><div class="card-body">
+      <h2 class="h6 text-body-secondary"><span aria-hidden="true">◈</span> Saldo reservado</h2><p class="h3 mb-0 text-break">{{ resumo.reservado|moeda }}</p>
+    </div></section>
+  </div>
+  <div class="col-12 col-md-4">
+    <section class="card h-100"><div class="card-body">
+      <h2 class="h6 text-body-secondary"><span aria-hidden="true">▤</span> Patrimônio total controlado</h2><p class="h3 mb-0 text-break">{{ resumo.patrimonio|moeda }}</p>
+    </div></section>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-lg-5">
+    <section class="card h-100"><div class="card-body">
+      <h2 class="h5">Receitas e despesas</h2>
+      <dl class="row mb-0">
+        <dt class="col-6">Receitas</dt><dd class="col-6 text-end text-break">{{ resumo.receitas|moeda }}</dd>
+        <dt class="col-6">Despesas</dt><dd class="col-6 text-end text-break">{{ resumo.despesas|moeda }}</dd>
+      </dl>
+      {% if resumo.receitas or resumo.despesas %}
+      <div class="mx-auto mt-3" style="max-width: 12rem">
+        <canvas id="grafico-financeiro" aria-label="Proporção entre receitas e despesas" role="img"></canvas>
+      </div>
+      {% else %}
+      <p class="text-body-secondary mb-0">Nenhuma receita ou despesa para exibir no gráfico.</p>
+      {% endif %}
+    </div></section>
+  </div>
+  <div class="col-12 col-lg-7">
+    <section class="card h-100"><div class="card-body">
+      <div class="d-flex flex-wrap justify-content-between gap-2">
+        <h2 class="h5">Transações recentes</h2>
+        <a href="{% url 'transacoes:lista' %}">Ver histórico</a>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for transacao in recentes %}
+        <li class="list-group-item px-0 d-flex flex-wrap justify-content-between gap-2">
+          <div class="text-break"><strong>{{ transacao }}</strong><br>
+            <small class="text-body-secondary">{{ transacao.get_tipo_display }} · {{ transacao.data|date:"d/m/Y" }}</small>
+          </div>
+          <span class="text-break">{{ transacao.valor|moeda_decimal }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item px-0">Nenhuma transação cadastrada.</li>
+        {% endfor %}
+      </ul>
+    </div></section>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+  <h2 class="h4">Metas financeiras</h2>
+  <a class="btn btn-outline-primary" href="{% url 'metas:nova' %}">Nova meta</a>
+</div>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+  {% for meta, progresso in cards %}
+  <div class="col">
+    <section class="card h-100"><div class="card-body">
+      <h3 class="h5 text-break"><a href="{% url 'metas:detalhe' meta.pk %}">{{ meta.nome }}</a></h3>
+      <p class="text-break">{{ progresso.acumulado|moeda }} de {{ meta.objetivo|moeda_decimal }}</p>
+      {% include "myfinance/progresso.html" %}
+      <p class="small mt-2">{{ progresso.dias }} dias restantes · {{ meta.prazo|date:"d/m/Y" }}</p>
+      <div class="d-flex flex-wrap gap-2">
+        {% if resumo.disponivel > 0 %}<a class="btn btn-sm btn-primary" href="{% url 'metas:aportar' meta.pk %}">Aportar</a>
+        {% else %}<button class="btn btn-sm btn-primary" disabled>Aportar</button>{% endif %}
+        {% if progresso.acumulado > 0 %}<a class="btn btn-sm btn-outline-primary" href="{% url 'metas:retirar' meta.pk %}">Retirar</a>
+        {% else %}<button class="btn btn-sm btn-outline-primary" disabled>Retirar</button>{% endif %}
+      </div>
+    </div></section>
+  </div>
+  {% empty %}
+  <div class="col"><p class="text-body-secondary">Nenhuma meta ativa.</p></div>
+  {% endfor %}
+</div>
+{% if resumo.receitas or resumo.despesas %}
+  {{ grafico|json_script:"dados-financeiros" }}
+  <script defer src="{% static 'myfinance/chart.umd.js' %}"></script>
+  <script defer src="{% static 'myfinance/dashboard.js' %}"></script>
+{% endif %}
+{% endblock %}

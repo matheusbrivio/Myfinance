@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ titulo }} · MyFinance</title>
+  <link rel="stylesheet" href="{% static 'myfinance/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'myfinance/interface.css' %}">
+</head>
+<body class="bg-body-tertiary">
+  <header class="myfinance-header">
+    <nav class="container d-flex flex-wrap align-items-center gap-3 py-3" aria-label="Navegação principal">
+      <strong class="me-md-auto"><span aria-hidden="true">◆</span> MyFinance</strong>
+      {% with rota=request.resolver_match %}
+      <a href="{% url 'dashboard' %}" {% if rota.url_name == 'dashboard' %}aria-current="page"{% endif %}>Visão geral</a>
+      <a href="{% url 'categorias:lista' %}" {% if rota.namespace == 'categorias' %}aria-current="page"{% endif %}>Categorias</a>
+      <a href="{% url 'transacoes:lista' %}" {% if rota.namespace == 'transacoes' %}aria-current="page"{% endif %}>Transações</a>
+      <a href="{% url 'metas:lista' %}" {% if rota.namespace == 'metas' %}aria-current="page"{% endif %}>Metas</a>
+      {% endwith %}
+    </nav>
+  </header>
+  <main class="container py-4">
+    {% for message in messages %}
+      <p class="alert {% if message.level == 40 %}alert-danger{% else %}alert-success{% endif %}" role="status">{{ message }}</p>
+    {% endfor %}
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>
