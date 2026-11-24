@@ -28,3 +28,11 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
 }
+
+/* Fundo ASCII: topo vívido, resto escurecido. Conteúdo fica em cards opacos. */
+.fundo { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--color-base); pointer-events: none; }
+.fundo-ascii { position: absolute; inset: 0; }
+.fundo-estatico { position: absolute; inset: 0; background:
+  radial-gradient(120% 60% at 50% 0%, #38bdf8 0%, #1e3fd8 38%, transparent 72%); opacity: .55; }
+.fundo-mascara { position: absolute; inset: 0; background:
+  linear-gradient(to bottom, rgb(7 10 18 / 0) 0, rgb(7 10 18 / .25) 140px, rgb(7 10 18 / .93) 380px, rgb(7 10 18 / .93) 100%); }

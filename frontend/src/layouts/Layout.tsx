@@ -1,6 +1,7 @@
 import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Tags } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { NavLink, Outlet, useLocation } from 'react-router'
+import { Fundo } from '../components/Fundo'
 
 const paginas = [
   { caminho: '/', titulo: 'Visão geral', icone: LayoutDashboard },
@@ -13,6 +14,7 @@ export function Layout() {
   const reduz = useReducedMotion()
   const pagina = paginas.find(p => p.caminho === pathname || (p.caminho !== '/' && pathname.startsWith(p.caminho + '/')))
   return <div className="min-h-screen md:grid md:grid-cols-[14rem_minmax(0,1fr)]">
+    <Fundo/>
     <aside className="border-b border-line bg-panel px-4 py-4 md:sticky md:top-0 md:h-screen md:border-b-0 md:border-r md:p-5">
       <NavLink to="/" className="mb-3 flex items-center gap-2 text-lg font-bold md:mb-8"><ChartNoAxesCombined className="text-accent" aria-hidden /> MyFinance</NavLink>
       <nav aria-label="Principal" className="grid grid-cols-2 gap-1 sm:grid-cols-4 md:grid-cols-1">
