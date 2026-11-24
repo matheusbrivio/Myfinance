@@ -36,3 +36,29 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   radial-gradient(120% 60% at 50% 0%, #38bdf8 0%, #1e3fd8 38%, transparent 72%); opacity: .55; }
 .fundo-mascara { position: absolute; inset: 0; background:
   linear-gradient(to bottom, rgb(7 10 18 / 0) 0, rgb(7 10 18 / .25) 140px, rgb(7 10 18 / .93) 380px, rgb(7 10 18 / .93) 100%); }
+
+/* Topbar flutuante (desktop) e tab bar inferior (mobile) */
+.topbar { position: sticky; top: 12px; z-index: 30; margin: 12px auto 0; width: min(1200px, calc(100% - 24px));
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 8px 6px 16px;
+  border: 1px solid var(--color-line); border-radius: 14px; background: rgb(13 18 32 / .96); }
+.marca { display: flex; align-items: center; gap: 8px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap; }
+.nav { position: relative; display: flex; gap: 2px; }
+.nav-item { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px;
+  font-size: 14px; color: var(--color-muted); transition: color .15s; }
+.nav-item:hover, .nav-item[aria-current="page"] { color: var(--color-accent); }
+.indicador { position: absolute; left: 0; top: 0; z-index: 0; border-radius: 10px; background: rgb(125 211 252 / .12);
+  box-shadow: inset 0 0 0 1px rgb(125 211 252 / .25); transition: transform .28s cubic-bezier(.3,.8,.3,1), width .28s cubic-bezier(.3,.8,.3,1); }
+@media (max-width: 767px) {
+  .marca span { display: none; }
+  .nav { position: fixed; z-index: 40; left: 12px; right: 12px; bottom: 12px; padding: 4px; justify-content: space-between;
+    border: 1px solid var(--color-line); border-radius: 16px; background: rgb(13 18 32 / .97); }
+  .nav-item { flex: 1; flex-direction: column; gap: 2px; padding: 8px 4px; font-size: 11px; }
+  .nav .indicador { border-radius: 12px; }
+  .topbar { justify-content: flex-start; }
+  .pagina { padding-bottom: 96px !important; }
+}
+/* Faixa livre no topo deixa o ASCII vívido sem texto por cima. */
+.pagina { margin: 88px auto 0; width: min(1200px, calc(100% - 24px)); padding-bottom: 48px; animation: aparecer .18s ease-out; }
+.titulo-pagina { margin-bottom: 16px; }
+.titulo-pagina h1 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 650; letter-spacing: -.03em; }
+.titulo-pagina { display: inline-block; padding: 10px 18px; border: 1px solid var(--color-line); border-radius: 12px; background: rgb(13 18 32 / .96); }
