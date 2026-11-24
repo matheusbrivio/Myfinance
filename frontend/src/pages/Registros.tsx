@@ -62,7 +62,7 @@ export function Transacoes() {
   const inicial = item && { descricao: item.descricao, data: item.data, valor: item.valor,
     tipo: item.tipo, categoria: item.categoria === null ? '' : String(item.categoria) }
   const titulo = edicao?.modo === 'editar' ? 'Editar transação' : edicao?.modo === 'excluir' ? 'Excluir transação' : 'Nova transação'
-  const chaveFiltros = ['tipo','categoria','data_inicio','data_fim'].map(k => params.get(k) || '').join('|')
+  const chaveFiltros = ['categoria','data_inicio','data_fim'].map(k => params.get(k) || '').join('|')
   return <>
     <button disabled={!cats.data} className={primario + ' mb-4'} onClick={() => setEdicao({ modo: 'novo' })}>Nova transação</button>
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
