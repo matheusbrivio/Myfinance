@@ -31,6 +31,8 @@ export function FundoLiquido({ noApp = false }: { noApp?: boolean }) {
     <motion.div className="fundo-camada" initial={false} animate={{ y: noApp && !reduz ? '-30vh' : 0 }}
       transition={{ duration: reduz ? 0 : 1, ease: [0.76, 0, 0.24, 1] }}>
       <span className="fundo-mancha fundo-mancha-a"/><span className="fundo-mancha fundo-mancha-b"/>
+      {/* Repetem a composição da intro 30vh abaixo: depois da descida, o app fica com o mesmo fundo. */}
+      <span className="fundo-mancha fundo-mancha-c"/><span className="fundo-mancha fundo-mancha-d"/>
       <span className="fundo-pontos"/>
     </motion.div>
     <div className="fundo-veu"/>
