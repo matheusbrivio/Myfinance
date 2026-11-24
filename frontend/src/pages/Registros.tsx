@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Historico } from '../components/Historico'
 import { Formulario, Calendario, type Campo } from '../components/Formulario'
+import { Abas } from '../components/Abas'
 import { Dialogo, Estado, Painel, botao, campo, primario } from '../components/ui'
 import { useQuery } from '../hooks/useQuery'
 import { api, todas } from '../services/api'
@@ -17,7 +18,7 @@ export function Categorias() {
   const titulo = edicao?.modo === 'editar' ? 'Editar categoria' : edicao?.modo === 'excluir' ? 'Excluir categoria' : 'Nova categoria'
   return <>
     <button className={primario + ' mb-4'} onClick={() => setEdicao({ modo: 'novo' })}>Nova categoria</button>
-    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload}/> :
+    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={4}/> :
       <div className="grid gap-3 sm:grid-cols-2">{q.data.length ? q.data.map(item => <Painel key={item.id}>
         <h2 className="break-words font-semibold">{item.nome}</h2><p className="mb-3 break-words text-muted">{item.descricao}</p>
         <Acoes editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>
@@ -65,8 +66,15 @@ export function Transacoes() {
   return <>
     <button disabled={!cats.data} className={primario + ' mb-4'} onClick={() => setEdicao({ modo: 'novo' })}>Nova transação</button>
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
+    <div className="mb-3"><Abas rotulo="Tipo de transação" valor={params.get('tipo') || ''} opcoes={[
+      { valor: '', rotulo: 'Todas' }, { valor: 'receita', rotulo: 'Receitas' }, { valor: 'despesa', rotulo: 'Despesas' }]}
+      mudar={tipo => {
+        const novos = new URLSearchParams(params)
+        if (tipo) novos.set('tipo', tipo); else novos.delete('tipo')
+        novos.delete('pagina'); setParams(novos)
+      }}/></div>
     <Filtros key={chaveFiltros} params={params} opcoes={opcoes} setParams={setParams}/>
-    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload}/> :
+    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={5}/> :
       <Painel><Historico itens={q.data.resultados} acoes={item => <Acoes editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>}/>
         <Paginacao pagina={q.data.pagina} total={q.data.total} mudar={pagina => {
           const novos = new URLSearchParams(params)
@@ -84,28 +92,24 @@ export function Transacoes() {
 function Filtros({ params, opcoes, setParams }: {
   params: URLSearchParams; opcoes: { valor: string; rotulo: string }[]; setParams: (v: URLSearchParams) => void
 }) {
-  const [tipo, setTipo] = useState(params.get('tipo') || '')
   const [categoria, setCategoria] = useState(params.get('categoria') || '')
   const [inicio, setInicio] = useState(params.get('data_inicio') ? dataBR(params.get('data_inicio')!) : '')
   const [fim, setFim] = useState(params.get('data_fim') ? dataBR(params.get('data_fim')!) : '')
-  return <form className="mb-4 grid gap-3 rounded-xl border border-line bg-panel p-4 sm:grid-cols-2 xl:grid-cols-4" onSubmit={e => {
+  return <form className="mb-4 grid gap-3 rounded-xl border border-line bg-panel/95 p-4 sm:grid-cols-2 xl:grid-cols-3" onSubmit={e => {
     e.preventDefault()
     const novos = new URLSearchParams()
-    for (const [k,v] of Object.entries({ tipo, categoria, data_inicio: dataISO(inicio), data_fim: dataISO(fim) })) if (v) novos.set(k,v)
+    for (const [k,v] of Object.entries({ tipo: params.get('tipo') || '', categoria, data_inicio: dataISO(inicio), data_fim: dataISO(fim) })) if (v) novos.set(k,v)
     setParams(novos)
   }}>
-    <div><label htmlFor="filtro-tipo">Tipo</label><select id="filtro-tipo" className={campo} value={tipo} onChange={e => setTipo(e.target.value)}>
-      <option value="">Todas</option><option value="receita">Receitas</option><option value="despesa">Despesas</option>
-    </select></div>
-    <div><label htmlFor="filtro-categoria">Categoria</label><select id="filtro-categoria" className={campo} value={categoria} onChange={e => setCategoria(e.target.value)}>
+    <div><label className="rotulo" htmlFor="filtro-categoria">Categoria</label><select id="filtro-categoria" className={campo} value={categoria} onChange={e => setCategoria(e.target.value)}>
       <option value="">Todas as categorias</option><option value="sem_categoria">Sem categoria</option>
       {opcoes.map(o => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
     </select></div>
-    <div><label htmlFor="inicio">Data inicial</label><Calendario id="inicio" valor={inicio} mudar={setInicio}/></div>
-    <div><label htmlFor="fim">Data final</label><Calendario id="fim" valor={fim} mudar={setFim}/></div>
-    <div className="flex flex-wrap gap-2 sm:col-span-2">
+    <div><label className="rotulo" htmlFor="inicio">Data inicial</label><Calendario id="inicio" valor={inicio} mudar={setInicio}/></div>
+    <div><label className="rotulo" htmlFor="fim">Data final</label><Calendario id="fim" valor={fim} mudar={setFim}/></div>
+    <div className="flex flex-wrap gap-2 sm:col-span-2 xl:col-span-3">
       <button className={primario}>Aplicar filtros</button>
-      <button type="button" className={botao} onClick={() => { setTipo(''); setCategoria(''); setInicio(''); setFim(''); setParams(new URLSearchParams()) }}>Limpar filtros</button>
+      <button type="button" className={botao} onClick={() => { setCategoria(''); setInicio(''); setFim(''); setParams(new URLSearchParams()) }}>Limpar filtros</button>
     </div>
   </form>
 }

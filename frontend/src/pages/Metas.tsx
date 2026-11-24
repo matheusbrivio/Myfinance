@@ -19,7 +19,7 @@ export function Metas() {
   const [nova, setNova] = useState(false)
   return <>
     <button className={primario + ' mb-4'} onClick={() => setNova(true)}>Nova meta</button>
-    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload}/> : <>
+    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/> : <>
       {q.data.length ? <div className="grid gap-3 lg:grid-cols-2">{q.data.map(meta => <CardMeta key={meta.id} meta={meta}/>)}</div> :
         <p className="text-muted">Nenhuma meta cadastrada.</p>}
     </>}

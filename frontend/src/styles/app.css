@@ -94,3 +94,10 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   background: linear-gradient(100deg, #0d1220 30%, #172036 50%, #0d1220 70%) 0 0 / 220% 100%;
   animation: brilho 1.2s linear infinite; animation-delay: calc(var(--i) * 80ms); }
 @keyframes brilho { to { background-position: -220% 0; } }
+
+/* Abas segmentadas */
+.abas { position: relative; display: inline-flex; padding: 3px; border: 1px solid var(--color-line); border-radius: 12px; background: rgb(13 18 32 / .96); }
+.aba { position: relative; z-index: 1; padding: 7px 16px; border-radius: 9px; font-size: 14px; color: var(--color-muted); transition: color .15s; }
+.aba[aria-selected="true"] { color: var(--color-accent); }
+.abas .indicador { border-radius: 9px; }
+.rotulo { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); }
