@@ -79,6 +79,7 @@ class FiltroSerializer(serializers.Serializer):
     categoria = serializers.CharField(required=False)
     data_inicio = serializers.DateField(required=False)
     data_fim = serializers.DateField(required=False)
+    busca = serializers.CharField(required=False, max_length=100, allow_blank=True)
     pagina = serializers.IntegerField(min_value=1, required=False, default=1)
 
     def validate_categoria(self, valor):

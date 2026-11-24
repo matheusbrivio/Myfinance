@@ -36,7 +36,8 @@ def _categoria_interna():
 
 
 @transaction.atomic
-def movimentar(meta_id, tipo, valor):
+def movimentar(meta_id, tipo, valor, instante=None):
+    """`instante` só é informado pelos dados de exemplo; o padrão é agora. As validações não mudam."""
     meta = get_object_or_404(Meta, pk=meta_id)
     if meta.arquivada_em:
         raise ValidationError("Esta meta está arquivada.")
@@ -52,7 +53,7 @@ def movimentar(meta_id, tipo, valor):
         prefixo = "Retirada da meta"
     else:
         raise ValidationError("Tipo de movimentação inválido.")
-    instante = timezone.now()
+    instante = instante or timezone.now()
     transacao = Transacao.objects.create(
         descricao=f"{prefixo} — {meta.nome}", tipo=tipo, valor=valor, instante=instante,
         data=timezone.localdate(instante), categoria=_categoria_interna(),

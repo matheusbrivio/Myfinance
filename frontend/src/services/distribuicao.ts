@@ -1,17 +1,19 @@
 import type { Resumo } from '../types/financeiro'
 
 const parcelas = [
-  { id: 'disponivel', nome: 'Saldo disponível', cor: '#22D3EE' },
-  { id: 'despesas', nome: 'Despesas convencionais', cor: '#FB7185' },
-  { id: 'reservado', nome: 'Reservado em metas', cor: '#FBBF24' },
+  { id: 'disponivel', nome: 'Saldo disponível', cor: '#2563EB' },
+  { id: 'despesas', nome: 'Despesas convencionais', cor: '#E11D48' },
+  { id: 'reservado', nome: 'Reservado em metas', cor: '#F59E0B' },
 ] as const
+// No recorte mensal a primeira parcela é a sobra do mês, não o saldo disponível acumulado.
+const nomesDoMes = { disponivel: 'Sobra do mês', despesas: 'Despesas do mês', reservado: 'Reservado no mês' } as const
 
 function centavos(valor: string) {
   return /^-?\d+\.\d{2}$/.test(valor) ? BigInt(valor.replace('.', '')) : null
 }
 
-export function distribuirDinheiro(saldos: Resumo['saldos']) {
-  const segmentos = parcelas.map(parcela => ({ ...parcela, valor: saldos[parcela.id] }))
+export function distribuirDinheiro(saldos: Resumo['saldos'], mensal = false) {
+  const segmentos = parcelas.map(parcela => ({ ...parcela, nome: mensal ? nomesDoMes[parcela.id] : parcela.nome, valor: saldos[parcela.id] }))
   const receitas = centavos(saldos.receitas)
   if (receitas === 0n) return { estado: 'vazio', segmentos } as const
 

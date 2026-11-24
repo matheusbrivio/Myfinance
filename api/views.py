@@ -1,4 +1,7 @@
+import csv
+
 from django.db import transaction
+from django.http import HttpResponse
 from django.db.models.deletion import ProtectedError
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -17,7 +20,9 @@ from metas.services import criar_meta_validada, encerrar, historico, movimentar
 from transacoes.models import Transacao
 from transacoes.saldos import saldos
 
+from .exemplo import BaseComDados, popular_exemplo
 from .http import Conflito, envelope, idempotente
+from . import insights as regras_insights, mensal
 from .projecoes import dinheiro, graficos, meta_json, reservas
 from .serializers import (
     CONVENCIONAIS, CategoriaSerializer, FiltroSerializer, MetaSerializer,
@@ -144,6 +149,8 @@ class Transacoes(Recurso):
         for entrada, lookup in (("tipo", "tipo"), ("data_inicio", "data__gte"), ("data_fim", "data__lte")):
             if entrada in dados:
                 queryset = queryset.filter(**{lookup: dados[entrada]})
+        if dados.get("busca"):
+            queryset = queryset.filter(descricao__icontains=dados["busca"])
         return queryset, dados["pagina"]
 
 
@@ -216,16 +223,77 @@ class Historico(JSONView):
 class Resumo(JSONView):
     @transaction.atomic
     def get(self, request):
+        periodo = mensal.periodo_da_requisicao(request)
         resumo = saldos()
         metas = list(Meta.objects.filter(arquivada_em__isnull=True))
         saldos_metas = reservas(metas)
+        recentes = Transacao.objects.select_related("categoria")
+        dados = {}
+        if periodo:
+            # Com ?mes: receitas e despesas do mês; disponível, reservado e patrimônio até o fim do mês.
+            inicio, fim = periodo
+            fluxo = mensal.fluxos(inicio, fim)
+            posicao = mensal.posicao(fim)
+            exibidos = posicao | {"receitas": fluxo["receitas"], "despesas": fluxo["despesas"]}
+            recentes = recentes.filter(data__range=periodo)
+            dados["mes"] = {"inicio": inicio.isoformat(), "fim": fim.isoformat()} | {
+                campo: dinheiro(fluxo[campo]) for campo in ("receitas", "despesas", "reservado", "sobra")}
+        else:
+            exibidos = resumo
         return Response({
-            "saldos": {nome: dinheiro(valor) for nome, valor in resumo.items()},
-            "recentes": TransacaoSerializer(Transacao.objects.select_related("categoria")[:5], many=True).data,
+            "saldos": {nome: dinheiro(exibidos[nome]) for nome in resumo},
+            "recentes": TransacaoSerializer(recentes[:5], many=True).data,
             "metas": [meta_json(meta, saldos_metas[meta.pk], resumo["disponivel"]) for meta in metas],
-        })
+            # Base sem nenhuma transação: o dashboard oferece os dados de exemplo.
+            "vazia": not Transacao.objects.exists(),
+        } | dados)
 
 
 class Graficos(JSONView):
     def get(self, request):
-        return Response(graficos())
+        periodo = mensal.periodo_da_requisicao(request)
+        return Response(graficos(*periodo) if periodo else graficos())
+
+
+class Exemplo(JSONView):
+    """Carrega os dados de exemplo; só numa base sem transações."""
+
+    def post(self, request):
+        try:
+            return Response(popular_exemplo(), status=201)
+        except BaseComDados as erro:
+            raise Conflito(str(erro))
+
+
+class Insights(JSONView):
+    """Até 3 frases do mês (ver api/insights.py). Sem `mes`, o mês atual."""
+
+    def get(self, request):
+        periodo = mensal.periodo_da_requisicao(request) or regras_insights.mes_atual()
+        return Response(regras_insights.insights(*periodo))
+
+
+def celula(texto):
+    """Texto seguro para planilha: sem o apóstrofo, o Excel executaria "=...", "+...", "-...", "@..." como fórmula."""
+    return "'" + texto if texto[:1] in ("=", "+", "-", "@", "\t", "\r") else texto
+
+
+class ExportarTransacoes(Transacoes):
+    """CSV das transações com os mesmos filtros da listagem, pronto para o Excel em português."""
+    # Só leitura: herda os filtros de Transacoes, não a escrita.
+    http_method_names = ["get", "head", "options"]
+
+    def get(self, request, pk=None):
+        queryset, _ = self.filtros(request)
+        resposta = HttpResponse(content_type="text/csv; charset=utf-8")
+        resposta["Content-Disposition"] = f'attachment; filename="myfinance-transacoes-{mensal.hoje().isoformat()}.csv"'
+        resposta.write("\ufeff")  # BOM: o Excel reconhece o UTF-8 e os acentos.
+        escritor = csv.writer(resposta, delimiter=";", lineterminator="\r\n")
+        escritor.writerow(["Data", "Tipo", "Descrição", "Categoria", "Valor"])
+        tipos = dict(Transacao.Tipo.choices)
+        for t in queryset:
+            escritor.writerow([
+                t.data.strftime("%d/%m/%Y"), tipos[t.tipo], celula(t.descricao),
+                celula(t.categoria.nome) if t.categoria else "Sem categoria", format(t.valor, ".2f").replace(".", ","),
+            ])
+        return resposta

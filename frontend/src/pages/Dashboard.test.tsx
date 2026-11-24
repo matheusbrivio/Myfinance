@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
+import { MemoryRouter } from 'react-router'
 import { Dashboard } from './Dashboard'
 import { Avisos, useAviso } from '../components/ui'
 import { Formulario } from '../components/Formulario'
@@ -17,7 +18,7 @@ afterEach(() => { cleanup(); vi.resetAllMocks(); vi.useRealTimers() })
 
 test('mostra carregamento e erro com nova tentativa', async () => {
   mock.mockRejectedValue(new Error('Não foi possível conectar.'))
-  render(<Dashboard/>)
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
   expect(screen.getByRole('status').textContent).toContain('Carregando')
   expect((await screen.findByRole('alert')).textContent).toContain('Não foi possível conectar.')
   expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeTruthy()
@@ -25,11 +26,48 @@ test('mostra carregamento e erro com nova tentativa', async () => {
 
 test('exibe indicadores e estados vazios com dados da API', async () => {
   mock.mockResolvedValueOnce({ saldos: { disponivel:'0.00', patrimonio:'0.00', reservado:'0.00', receitas:'0.00', despesas:'0.00' }, recentes:[], metas:[] })
-  render(<Dashboard/>)
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
   expect(await screen.findByText('Saldo disponível')).toBeTruthy()
   expect(screen.getByText('Nenhuma receita registrada para distribuir.')).toBeTruthy()
   expect(screen.queryByRole('heading', { name: 'Despesas por categoria' })).toBeNull()
   expect(screen.getByText('Nenhuma meta ativa.')).toBeTruthy()
+})
+
+test('pede o resumo e os gráficos do mês atual', async () => {
+  mock.mockResolvedValue({ saldos: { disponivel:'0.00', patrimonio:'0.00', reservado:'0.00', receitas:'0.00', despesas:'0.00' }, recentes:[], metas:[] })
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
+  await screen.findByText('Saldo disponível')
+  const caminhos = mock.mock.calls.map(c => c[0])
+  expect(caminhos.some(c => /^resumo\/\?mes=\d{4}-\d{2}$/.test(c))).toBe(true)
+  expect(caminhos.some(c => /^graficos\/\?mes=\d{4}-\d{2}$/.test(c))).toBe(true)
+})
+
+test('sobra negativa do mês aparece sem percentuais', async () => {
+  mock.mockResolvedValueOnce({ saldos: { receitas:'100.00', despesas:'150.00', reservado:'0.00', disponivel:'500.00', patrimonio:'500.00' },
+    mes: { inicio:'2026-11-01', fim:'2026-11-24', receitas:'100.00', despesas:'150.00', reservado:'0.00', sobra:'-50.00' }, recentes:[], metas:[] })
+  render(<MemoryRouter initialEntries={['/?mes=2026-11']}><Dashboard/></MemoryRouter>)
+  expect(await screen.findByText(/A sobra do mês está negativa/)).toBeTruthy()
+  const legenda = screen.getByRole('list', { name: 'Legenda da distribuição' })
+  expect(legenda.textContent).toContain('Sobra do mês')
+  expect(legenda.textContent).toContain('-R$ 50,00')
+  expect(legenda.textContent).not.toContain('%')
+})
+
+test('mostra o resumo do mês ao lado do hero, e só o card falha se os insights falharem', async () => {
+  const resumo = { saldos: { disponivel:'0.00', patrimonio:'0.00', reservado:'0.00', receitas:'0.00', despesas:'0.00' }, recentes:[], metas:[] }
+  mock.mockImplementation(async (caminho: string) => caminho.startsWith('insights/')
+    ? [{ tipo: 'maior_gasto', tom: 'neutro', texto: 'Seu maior gasto foi Aluguel (R$ 750,00), no dia 10.' }]
+    : caminho.startsWith('resumo/') ? resumo : null)
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
+  expect(await screen.findByText('Seu maior gasto foi Aluguel (R$ 750,00), no dia 10.')).toBeTruthy()
+  cleanup()
+  mock.mockImplementation(async (caminho: string) => {
+    if (caminho.startsWith('insights/')) throw new Error('falhou')
+    return caminho.startsWith('resumo/') ? resumo : null
+  })
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
+  expect(await screen.findByText('Não foi possível calcular o resumo do mês.')).toBeTruthy()
+  expect(screen.getByText('Saldo disponível')).toBeTruthy()
 })
 
 test('usa o saldo disponível real com precisão de centavos', () => {
@@ -56,7 +94,7 @@ test('fecha em 100% mesmo quando as parcelas têm dízimas', () => {
 test('mantém valores negativos visíveis sem setores ou percentuais', async () => {
   mock.mockResolvedValueOnce({ saldos: { receitas:'100.00', despesas:'105.00', reservado:'5.00',
     disponivel:'-10.00', patrimonio:'-5.00' }, recentes:[], metas:[] })
-  render(<Dashboard/>)
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
   expect(await screen.findByText(/O saldo disponível está negativo/)).toBeTruthy()
   const legenda = screen.getByRole('list', { name: 'Legenda da distribuição' })
   expect(legenda.textContent).toContain('-R$ 10,00')
