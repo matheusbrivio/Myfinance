@@ -111,7 +111,8 @@ export function Avisos({ children }: { children: ReactNode }) {
           <Toast.Close aria-label="Fechar notificação" className={icone + ' size-8 shrink-0'}><X size={16}/></Toast.Close>
         </motion.li>
       </Toast.Root>)}
-      <Toast.Viewport label="Notificações" className="fixed bottom-5 right-5 z-[60] grid w-[min(24rem,calc(100%-2.5rem))] gap-2" />
+      {/* No celular, fica acima do menu fixo do rodapé (que tem ~76px) para não cobrir a navegação. */}
+      <Toast.Viewport label="Notificações" className="fixed bottom-[92px] right-5 z-[60] grid w-[min(24rem,calc(100%-2.5rem))] gap-2 tab:bottom-5" />
     </Toast.Provider>
   </AvisosContext.Provider>
 }
