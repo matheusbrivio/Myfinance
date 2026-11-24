@@ -62,3 +62,35 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 .titulo-pagina { margin-bottom: 16px; }
 .titulo-pagina h1 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 650; letter-spacing: -.03em; }
 .titulo-pagina { display: inline-block; padding: 10px 18px; border: 1px solid var(--color-line); border-radius: 12px; background: rgb(13 18 32 / .96); }
+
+/* Números: mono + tabular-nums em todo valor monetário */
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.hero { padding: 28px 24px; }
+
+/* Spinning counter */
+.dig { display: inline-block; height: 1em; line-height: 1em; overflow: hidden; vertical-align: bottom; }
+.dig-col { display: flex; flex-direction: column; transform: translateY(calc(var(--d) * -1em));
+  animation: giro .4s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 22ms); }
+.dig-col > span { display: block; height: 1em; line-height: 1em; }
+@keyframes giro { from { transform: translateY(0); } }
+/* Number subtle change */
+.troca { display: inline-block; animation: troca .25s ease-out; }
+@keyframes troca { from { opacity: .35; transform: translateY(4px); filter: blur(1px); } }
+/* Number pop-in */
+.pop { display: inline-block; animation: pop .3s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } }
+/* Texts reveal */
+.reveal-palavra { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .1em; margin-bottom: -.1em; }
+.reveal-palavra > span { display: inline-block; animation: sobe .4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 60ms); }
+@keyframes sobe { from { transform: translateY(105%); } }
+/* Matrix dot loader */
+.carregando { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--color-muted); font-size: 14px; }
+.matriz { display: inline-grid; grid-template-columns: repeat(3, 5px); gap: 3px; }
+.matriz i { width: 5px; height: 5px; border-radius: 50%; background: var(--color-accent); opacity: .2;
+  animation: ponto .9s ease-in-out infinite; animation-delay: calc(var(--i) * 90ms); }
+@keyframes ponto { 40% { opacity: 1; transform: scale(1.25); } }
+/* Skeleton */
+.esq { height: 56px; border-radius: 12px; border: 1px solid var(--color-line);
+  background: linear-gradient(100deg, #0d1220 30%, #172036 50%, #0d1220 70%) 0 0 / 220% 100%;
+  animation: brilho 1.2s linear infinite; animation-delay: calc(var(--i) * 80ms); }
+@keyframes brilho { to { background-position: -220% 0; } }

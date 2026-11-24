@@ -3,6 +3,7 @@ import * as Toast from '@radix-ui/react-toast'
 import { motion, useReducedMotion } from 'motion/react'
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { Esqueleto, MatrizLoader } from './Efeitos'
 
 export const botao = 'inline-flex items-center justify-center gap-2 rounded-[10px] border border-line px-3 py-2 text-sm font-medium hover:bg-line disabled:opacity-50'
 export const primario = botao + ' bg-accent text-base border-accent hover:bg-sky-200'
@@ -50,8 +51,11 @@ export function Avisos({ children }: { children: ReactNode }) {
     </Toast.Provider>
   </AvisosContext.Provider>
 }
-export function Estado({ carregando, erro, tentar }: { carregando: boolean; erro?: string; tentar: () => void }) {
-  if (carregando) return <p role="status" className="text-muted">Carregando…</p>
+export function Estado({ carregando, erro, tentar, linhas }: { carregando: boolean; erro?: string; tentar: () => void; linhas?: number }) {
+  if (carregando) return <div>
+    <p role="status" className="carregando"><MatrizLoader/>Carregando…</p>
+    {linhas ? <Esqueleto linhas={linhas}/> : null}
+  </div>
   if (erro) return <div role="alert" className={painel}><p className="mb-3 text-bad">{erro}</p><button onClick={tentar} className={botao}>Tentar novamente</button></div>
   return null
 }

@@ -1,6 +1,7 @@
 import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Tags } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useDeslizante } from '../components/Abas'
+import { TextoReveal } from '../components/Efeitos'
 import { Fundo } from '../components/Fundo'
 
 const paginas = [
@@ -24,7 +25,7 @@ export function Layout() {
       </nav>
     </header>
     <main key={pathname} id="principal" className="pagina">
-      <header className="titulo-pagina"><h1>{pagina?.titulo ?? 'Página indisponível'}</h1></header>
+      <header className="titulo-pagina"><h1><TextoReveal texto={pagina?.titulo ?? 'Página indisponível'}/></h1></header>
       <Outlet/>
     </main>
   </div>
