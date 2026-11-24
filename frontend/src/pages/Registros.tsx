@@ -6,6 +6,8 @@ import { Abas } from '../components/Abas'
 import { Entrada } from '../components/Entrada'
 import { Dialogo, Estado, Painel, botao, campo, primario } from '../components/ui'
 import { useQuery } from '../hooks/useQuery'
+import { useAtualizacao } from '../layouts/contexto'
+import { camposTransacao } from '../services/camposTransacao'
 import { api, todas } from '../services/api'
 import { dataBR, dataISO } from '../services/format'
 import type { Categoria, Lista, Transacao } from '../types/financeiro'
@@ -47,25 +49,18 @@ export function EdicaoRegistro<T extends {id: number}>({ edicao, campos, titulo,
 
 export function Transacoes() {
   const [params, setParams] = useSearchParams()
-  const q = useQuery('transacoes?' + params, signal => api<Lista<Transacao>>('transacoes/?' + params, { signal }))
+  const { versao } = useAtualizacao()
+  const q = useQuery('transacoes?' + params + '#' + versao, signal => api<Lista<Transacao>>('transacoes/?' + params, { signal }))
   const cats = useQuery('categorias', signal => todas<Categoria>('categorias/', signal))
   const [edicao, setEdicao] = useState<Edicao<Transacao>>()
   const opcoes = (cats.data ?? []).map(c => ({ valor: String(c.id), rotulo: c.nome }))
-  const campos: Campo[] = [
-    { nome: 'descricao', rotulo: 'Descrição' },
-    { nome: 'tipo', rotulo: 'Tipo', tipo: 'select', obrigatorio: true,
-      opcoes: [{ valor: '', rotulo: 'Selecione um tipo' }, { valor: 'receita', rotulo: 'Receita' }, { valor: 'despesa', rotulo: 'Despesa' }] },
-    { nome: 'valor', rotulo: 'Valor', tipo: 'moeda', obrigatorio: true },
-    { nome: 'data', rotulo: 'Data', tipo: 'data', obrigatorio: true },
-    { nome: 'categoria', rotulo: 'Categoria', tipo: 'select', opcoes: [{ valor: '', rotulo: 'Sem categoria' }, ...opcoes] },
-  ]
+  const campos = camposTransacao(opcoes)
   const item = edicao?.item
   const inicial = item && { descricao: item.descricao, data: item.data, valor: item.valor,
     tipo: item.tipo, categoria: item.categoria === null ? '' : String(item.categoria) }
   const titulo = edicao?.modo === 'editar' ? 'Editar transação' : edicao?.modo === 'excluir' ? 'Excluir transação' : 'Nova transação'
   const chaveFiltros = ['categoria','data_inicio','data_fim'].map(k => params.get(k) || '').join('|')
   return <>
-    <button disabled={!cats.data} className={primario + ' mb-4'} onClick={() => setEdicao({ modo: 'novo' })}>Nova transação</button>
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
     <Entrada agrupar><div className="mb-3"><Abas rotulo="Tipo de transação" valor={params.get('tipo') || ''} opcoes={[
       { valor: '', rotulo: 'Todas' }, { valor: 'receita', rotulo: 'Receitas' }, { valor: 'despesa', rotulo: 'Despesas' }]}

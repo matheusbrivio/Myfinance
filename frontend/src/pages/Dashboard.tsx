@@ -4,6 +4,7 @@ import { useReduzMovimento } from '../hooks/useReduzMovimento'
 import { api } from '../services/api'
 import { moeda } from '../services/format'
 import { useQuery } from '../hooks/useQuery'
+import { useAtualizacao } from '../layouts/contexto'
 import { CardMeta } from '../components/CardMeta'
 import { Historico } from '../components/Historico'
 import { Estado, Painel } from '../components/ui'
@@ -58,7 +59,8 @@ function Grafico({ saldos }: { saldos: Resumo['saldos'] }) {
 const secundarios = [['receitas', 'Receitas convencionais'], ['despesas', 'Despesas convencionais'], ['reservado', 'Saldo reservado em metas'], ['patrimonio', 'Patrimônio total controlado']] as const
 const cor = (id: string, valor: string) => valor.startsWith('-') || id === 'despesas' ? 'text-bad' : id === 'receitas' ? 'text-good' : id === 'reservado' ? 'text-warn' : 'text-accent'
 export function Dashboard() {
-  const q = useQuery('dashboard', signal => api<Resumo>('resumo/', { signal }))
+  const { versao } = useAtualizacao()
+  const q = useQuery('dashboard#' + versao, signal => api<Resumo>('resumo/', { signal }))
   if (!q.data) return <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/>
   const resumo = q.data
   return <div className="space-y-4">

@@ -59,31 +59,31 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
 }
 
-/* Topbar flutuante (desktop) e tab bar inferior (mobile) */
-.topbar { position: sticky; top: 12px; z-index: 30; margin: 12px auto 0; width: min(1200px, calc(100% - 24px));
-  display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 8px 6px 16px;
-  border: 1px solid var(--color-line); border-radius: 14px; background: rgb(13 18 32 / .96); }
-.marca { display: flex; align-items: center; gap: 8px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap; }
-.nav { position: relative; display: flex; gap: 2px; }
-.nav-item { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px;
-  font-size: 14px; color: var(--color-muted); transition: color .15s; }
-.nav-item:hover, .nav-item[aria-current="page"] { color: var(--color-accent); }
-.indicador { position: absolute; left: 0; top: 0; z-index: 0; border-radius: 10px; background: rgb(125 211 252 / .12);
-  box-shadow: inset 0 0 0 1px rgb(125 211 252 / .25); transition: transform .28s cubic-bezier(.3,.8,.3,1), width .28s cubic-bezier(.3,.8,.3,1); }
+/* Barra superior: logo, menu em pílula de vidro e CTA âmbar. */
+.barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1320px; margin: 0 auto; padding: 24px 40px; }
+.marca { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.marca img { width: 40px; height: 40px; filter: drop-shadow(0 0 8px rgba(95, 180, 224, .55)); }
+.marca span { font-family: var(--font-display); font-size: 28px; line-height: 1; }
+.pilula-grupo { position: relative; display: inline-flex; gap: 2px; padding: 6px; border-radius: 999px; }
+.pilula-item { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 21px; border-radius: 999px;
+  font-size: 15px; font-weight: 500; color: var(--text-soft); white-space: nowrap; transition: color .2s; }
+.pilula-item:hover { color: var(--text); }
+.pilula-item[aria-current="page"], .pilula-item[aria-selected="true"] { color: #0B0F17; }
+.pilula-texto { position: relative; z-index: 1; }
+.pilula-ativa { position: absolute; inset: 0; border-radius: 999px; background: var(--pill); box-shadow: 0 4px 18px -4px rgba(244, 246, 248, .45); }
+.cta { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 999px; background: var(--accent);
+  color: #1A0F06; font-weight: 600; font-size: 15px; white-space: nowrap; box-shadow: 0 10px 30px -10px rgba(240, 178, 122, .6); transition: transform .16s, filter .16s; }
+.cta:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.cta:disabled { opacity: .55; }
 @media (max-width: 767px) {
-  .marca span { display: none; }
-  .nav { position: fixed; z-index: 40; left: 12px; right: 12px; bottom: 12px; padding: 4px; justify-content: space-between;
-    border: 1px solid var(--color-line); border-radius: 16px; background: rgb(13 18 32 / .97); }
-  .nav-item { flex: 1; flex-direction: column; gap: 2px; padding: 8px 4px; font-size: 11px; }
-  .nav .indicador { border-radius: 12px; }
-  .topbar { justify-content: flex-start; }
-  .pagina { padding-bottom: 96px !important; }
+  .barra { flex-wrap: wrap; padding: 16px 16px 8px; }
+  .menu { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .cta { margin-left: auto; }
 }
-/* Faixa livre no topo deixa o ASCII vívido sem texto por cima. */
-.pagina { margin: 88px auto 0; width: min(1200px, calc(100% - 24px)); padding-bottom: 48px; animation: aparecer .18s ease-out; }
-.titulo-pagina { margin-bottom: 16px; }
-.titulo-pagina h1 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 650; letter-spacing: -.03em; }
-.titulo-pagina { display: inline-block; padding: 10px 18px; border: 1px solid var(--color-line); border-radius: 12px; background: rgb(13 18 32 / .96); }
+.pagina { margin: 0 auto; width: 100%; max-width: 1320px; padding: 8px 40px 64px; }
+@media (max-width: 767px) { .pagina { padding: 8px 16px 48px; } }
+.titulo-pagina { margin-bottom: 24px; }
+.titulo-pagina h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(56px, 7vw, 96px); line-height: 1; letter-spacing: -.02em; }
 
 /* Números: mono + tabular-nums em todo valor monetário */
 .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
@@ -113,11 +113,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   animation: brilho 1.2s linear infinite; animation-delay: calc(var(--i) * 80ms); }
 @keyframes brilho { to { background-position: -220% 0; } }
 
-/* Abas segmentadas */
-.abas { position: relative; display: inline-flex; padding: 3px; border: 1px solid var(--color-line); border-radius: 12px; background: rgb(13 18 32 / .96); }
-.aba { position: relative; z-index: 1; padding: 7px 16px; border-radius: 9px; font-size: 14px; color: var(--color-muted); transition: color .15s; }
-.aba[aria-selected="true"] { color: var(--color-accent); }
-.abas .indicador { border-radius: 9px; }
 .rotulo { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); }
 
 /* Modal open/close */

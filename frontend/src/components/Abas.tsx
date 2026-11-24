@@ -1,36 +1,24 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 
-// Indicador deslizante: mede o item ativo e move uma barra com transform.
-export function useDeslizante(seletor: string, chave: unknown) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [caixa, setCaixa] = useState<{ x: number; w: number; y: number; h: number }>()
-  useLayoutEffect(() => {
-    const medir = () => {
-      const raiz = ref.current
-      const ativo = raiz?.querySelector<HTMLElement>(seletor)
-      if (!raiz || !ativo) return setCaixa(undefined)
-      setCaixa({ x: ativo.offsetLeft, w: ativo.offsetWidth, y: ativo.offsetTop, h: ativo.offsetHeight })
-    }
-    medir()
-    if (typeof ResizeObserver === 'undefined' || !ref.current) return
-    const obs = new ResizeObserver(medir)
-    obs.observe(ref.current)
-    return () => obs.disconnect()
-  }, [seletor, chave])
-  const indicador = caixa && <span aria-hidden className="indicador"
-    style={{ transform: `translate(${caixa.x}px, ${caixa.y}px)`, width: caixa.w, height: caixa.h }}/>
-  return { ref, indicador }
+export const mola = { type: 'spring', stiffness: 400, damping: 32 } as const
+
+// Fundo deslizante compartilhado por menu e abas: `layoutId` move a pílula entre os itens.
+export function PilulaAtiva({ id }: { id: string }) {
+  const reduz = useReducedMotion()
+  return <motion.span aria-hidden layoutId={id} className="pilula-ativa" transition={reduz ? { duration: 0 } : mola}/>
 }
 
 export type OpcaoAba = { valor: string; rotulo: string }
-// Abas segmentadas (Todas / Receitas / Despesas).
-export function Abas({ opcoes, valor, mudar, rotulo }: {
-  opcoes: OpcaoAba[]; valor: string; mudar: (v: string) => void; rotulo: string
+// Abas em pílula (Todas / Receitas / Despesas), mesmo estilo do menu.
+export function Abas({ opcoes, valor, mudar, rotulo, id = 'abas' }: {
+  opcoes: OpcaoAba[]; valor: string; mudar: (v: string) => void; rotulo: string; id?: string
 }): ReactNode {
-  const { ref, indicador } = useDeslizante('[aria-selected="true"]', valor)
-  return <div ref={ref} role="tablist" aria-label={rotulo} className="abas">
-    {indicador}
+  return <div role="tablist" aria-label={rotulo} className="pilula-grupo glass">
     {opcoes.map(o => <button key={o.valor} role="tab" type="button" aria-selected={o.valor === valor}
-      className="aba" onClick={() => mudar(o.valor)}>{o.rotulo}</button>)}
+      className="pilula-item" onClick={() => mudar(o.valor)}>
+      {o.valor === valor && <PilulaAtiva id={id}/>}
+      <span className="pilula-texto">{o.rotulo}</span>
+    </button>)}
   </div>
 }
