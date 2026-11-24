@@ -27,21 +27,23 @@ export function CardMeta({ meta, acoes = true }: { meta: Meta; acoes?: boolean }
       <h2 className="titulo-card min-w-0 break-words">{meta.nome}</h2>
       <span className={'chip shrink-0' + (concluida ? ' chip-ambar' : '')}>{meta.arquivada_em ? 'Arquivada' : p.status}</span>
     </div>
-    <div className="mt-5 flex flex-wrap items-center gap-6">
+    <div className="mt-4 flex items-center gap-5">
       <div className="relative">
         <AnelProgresso valor={Number(p.barra)} texto={p.percentual.replace('.', ',') + '%'} rotulo={'Progresso de ' + meta.nome}/>
         {confete && <Confete/>}
       </div>
-      <dl className="dados-meta min-w-0 flex-1">
-        <div><dt>Acumulado</dt><dd className="break-all"><strong className="num text-lg font-medium text-accent">{moeda(p.acumulado)}</strong> <span className="text-muted">de</span> <span className="num">{moeda(meta.objetivo)}</span></dd></div>
-        <div><dt>Prazo</dt><dd><span className="num">{dataBR(meta.prazo)}</span> <span className="text-muted">· {p.dias} dias restantes</span></dd></div>
-        <div><dt>Aporte mensal</dt><dd className="num">{p.mensal === null ? 'indisponível' : moeda(p.mensal)}</dd></div>
-      </dl>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm"><strong className="num whitespace-nowrap font-semibold">{moeda(p.acumulado)}</strong> <span className="text-muted">de</span> <span className="num whitespace-nowrap">{moeda(meta.objetivo)}</span></p>
+        <dl className="dados-meta mt-2">
+          <div><dt>Prazo</dt><dd><span className="num">{dataBR(meta.prazo)}</span> · {p.dias} dias</dd></div>
+          <div><dt>Aporte mensal</dt><dd className="num">{p.mensal === null ? 'indisponível' : moeda(p.mensal)}</dd></div>
+        </dl>
+      </div>
     </div>
-    {acoes && <div className="mt-6 flex flex-wrap gap-2 pt-1">
+    {acoes && <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
       {meta.pode_aportar && <Link className={primario} to={'/metas/' + meta.id + '?acao=aportar'}>Aportar</Link>}
       {meta.pode_retirar && <Link className={botao} to={'/metas/' + meta.id + '?acao=retirar'}>Retirar</Link>}
-      <Link className={botao + ' border-transparent'} to={'/metas/' + meta.id}>Histórico</Link>
+      <Link className="ml-auto text-sm font-medium text-soft hover:text-text hover:underline" to={'/metas/' + meta.id}>Histórico</Link>
     </div>}
   </Painel>
 }

@@ -73,7 +73,7 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
     await lancar('receita','200,00','Casa')
     await lancar('despesa','75,00','Casa')
     await lancar('despesa','25,00')
-    const tabela = pagina.getByRole('list', {name:'Transações', exact:true})
+    const tabela = pagina.getByRole('table')
     await tabela.getByText('Sem categoria').waitFor()
     await pagina.getByRole('tab', {name:'Despesas'}).click()
     await pagina.waitForURL(/tipo=despesa/)
@@ -116,9 +116,9 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
     const legenda = pagina.getByRole('list', {name:'Legenda da distribuição'})
     await pagina.getByText('Total de receitas', {exact:true}).waitFor()
     for (const [nome, texto, cor] of [
-      ['Saldo disponível', '25,00% · R$ 50,00', '#8FD3F5'],
-      ['Despesas convencionais', '50,00% · R$ 100,00', '#FF9E8A'],
-      ['Reservado em metas', '25,00% · R$ 50,00', '#F0B27A'],
+      ['Saldo disponível', '25,00% · R$ 50,00', '#2563EB'],
+      ['Despesas convencionais', '50,00% · R$ 100,00', '#E11D48'],
+      ['Reservado em metas', '25,00% · R$ 50,00', '#F59E0B'],
     ]) {
       await legenda.getByRole('listitem').filter({hasText:nome}).getByText(texto).waitFor()
       await pagina.locator(`path[fill="${cor}"]`).first().waitFor()
@@ -133,7 +133,7 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
     await legenda.getByText('35,00% · R$ 70,00').waitFor()
     await legenda.getByText('15,00% · R$ 30,00').waitFor()
     await nav.getByRole('link', {name:'Transações'}).click()
-    await tabela.getByRole('listitem').filter({hasText:'R$ 75,00'}).getByRole('button', {name:/^Excluir/}).click()
+    await tabela.getByRole('row').filter({hasText:'R$ 75,00'}).getByRole('button', {name:/^Excluir/}).click()
     const exclusao = pagina.getByRole('dialog')
     await exclusao.getByText('R$ 75,00').waitFor()
     // HoldButton: segurar 1,2 s confirma; soltar antes cancela.

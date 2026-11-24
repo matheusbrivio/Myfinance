@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChartNoAxesCombined, Plus } from 'lucide-react'
+import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Plus, Tags } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { motion } from 'motion/react'
 import { PilulaAtiva } from '../components/Abas'
@@ -13,10 +13,10 @@ import { EdicaoRegistro } from '../pages/Registros'
 import { AtualizacaoContext } from './contexto'
 
 const paginas = [
-  { caminho: '/', titulo: 'Dashboard' },
-  { caminho: '/transacoes', titulo: 'Transações' },
-  { caminho: '/categorias', titulo: 'Categorias' },
-  { caminho: '/metas', titulo: 'Metas' },
+  { caminho: '/', titulo: 'Dashboard', icone: LayoutDashboard },
+  { caminho: '/transacoes', titulo: 'Transações', icone: List },
+  { caminho: '/categorias', titulo: 'Categorias', icone: Tags },
+  { caminho: '/metas', titulo: 'Metas', icone: Goal },
 ]
 export function Layout() {
   const { pathname } = useLocation()
@@ -30,18 +30,23 @@ export function Layout() {
     <div className="min-h-screen">
       <FundoLiquido/>
       <div className="app">
-        <header className="barra">
-          <NavLink to="/" className="marca" aria-label="MyFinance, ir para o Dashboard">
-            <span className="marca-icone"><ChartNoAxesCombined size={18} aria-hidden/></span><span>MyFinance</span>
-          </NavLink>
-          <nav aria-label="Principal" className="pilula-grupo glass menu">
-            {paginas.map(({ caminho, titulo }) => <NavLink end={caminho === '/'} key={caminho} to={caminho} className="pilula-item">
-              {({ isActive }) => <>{isActive && <PilulaAtiva id="menu-pilula"/>}<span className="pilula-texto">{titulo}</span></>}
-            </NavLink>)}
-          </nav>
-          <button type="button" className="cta" onClick={() => { setAberturas(n => n + 1); setNova(true) }}>Nova transação <Plus size={18} aria-hidden/></button>
-        </header>
-        <motion.main key={pathname} id="principal" className="pagina" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
+        {/* Uma única barra de vidro, fixa no topo. No celular o menu vai para uma barra no rodapé. */}
+        <div className="container-app barra-fixa">
+          <header className="barra">
+            <NavLink to="/" className="marca" aria-label="MyFinance, ir para o Dashboard">
+              <span className="marca-icone"><ChartNoAxesCombined size={18} aria-hidden/></span><span>MyFinance</span>
+            </NavLink>
+            <nav aria-label="Principal" className="menu">
+              {paginas.map(({ caminho, titulo, icone: Icone }) => <NavLink end={caminho === '/'} key={caminho} to={caminho} className="menu-item">
+                {({ isActive }) => <>{isActive && <PilulaAtiva id="menu-pilula"/>}
+                  <span className="pilula-texto menu-rotulo"><Icone className="menu-icone" size={18} aria-hidden/>{titulo}</span></>}
+              </NavLink>)}
+            </nav>
+            <button type="button" className="cta" onClick={() => { setAberturas(n => n + 1); setNova(true) }}>
+              <span className="cta-texto">Nova transação</span><Plus size={18} aria-hidden/></button>
+          </header>
+        </div>
+        <motion.main key={pathname} id="principal" className="container-app pagina" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
           <Outlet/>
         </motion.main>
       </div>

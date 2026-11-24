@@ -21,9 +21,10 @@ export function Metas() {
   const q = useQuery('metas', signal => todas<Meta>('metas/', signal))
   const [nova, setNova] = useState(false)
   return <>
-    <Cabecalho titulo="Metas"><button className={primario} onClick={() => setNova(true)}>Nova meta <Plus size={16} aria-hidden/></button></Cabecalho>
+    <Cabecalho titulo="Metas" subtitulo="Quanto já foi guardado para cada objetivo."><button className={primario} onClick={() => setNova(true)}><Plus size={16} aria-hidden/>Nova meta</button></Cabecalho>
     {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/> : <>
-      {q.data.length ? <Entrada agrupar className="grid gap-5 [grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr))]">{q.data.map(meta => <CardMeta key={meta.id} meta={meta}/>)}</Entrada> :
+      {q.data.length ? <div className="grade">{q.data.map((meta, i) => <Entrada key={meta.id} delay={Math.min(i, 8) * 0.05}
+        className="col-span-12 tab:col-span-6 bento:col-span-4"><CardMeta meta={meta}/></Entrada>)}</div> :
         <Painel><p className="text-muted">Nenhuma meta cadastrada.</p></Painel>}
     </>}
     <EdicaoRegistro<Meta> edicao={nova ? { modo: 'novo' } : undefined} titulo="Nova meta" campos={[...campos, { nome: 'inicial', rotulo: 'Aporte inicial', tipo: 'moeda' }]}
@@ -43,15 +44,15 @@ export function DetalheMeta() {
     return { meta, historico: historico.resultados }
   })
   const voltar = <Link to="/metas" className={botao + ' border-transparent'}><ArrowLeft size={16} aria-hidden/>Voltar para metas</Link>
-  if (!q.data) return <><Cabecalho titulo="Metas">{voltar}</Cabecalho><Estado carregando={q.loading} erro={q.error} tentar={q.reload}/></>
+  if (!q.data) return <><Cabecalho titulo="Metas" subtitulo="Detalhe da meta">{voltar}</Cabecalho><Estado carregando={q.loading} erro={q.error} tentar={q.reload}/></>
   const { meta, historico } = q.data
   const acao = params.get('acao')
   const aporte = acao === 'aportar' && meta.pode_aportar
   const retirada = acao === 'retirar' && meta.pode_retirar
   return <>
-    <Cabecalho titulo="Metas">{voltar}</Cabecalho>
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-      <Entrada className="space-y-4">
+    <Cabecalho titulo="Metas" subtitulo={'Detalhe de ' + meta.nome}>{voltar}</Cabecalho>
+    <div className="grade items-start">
+      <Entrada className="col-span-12 bento:col-span-5 space-y-5">
         <CardMeta meta={meta}/>
         <Painel>
           {meta.descricao && <p className="mb-3 break-words text-soft">{meta.descricao}</p>}
@@ -62,9 +63,9 @@ export function DetalheMeta() {
           </div>}
         </Painel>
       </Entrada>
-      <Entrada delay={0.08}><Painel><Acordeao titulo="Histórico da meta">
+      <Entrada className="col-span-12 bento:col-span-7" delay={0.08}><Painel><Acordeao titulo="Histórico da meta">
         {historico.length ? <div className="overflow-x-auto"><table className="w-full text-left text-sm">
-          <thead><tr>{['Movimentação','Valor','Data e hora','Saldo'].map(s => <th key={s} className={'rotulo-secao px-2 pb-3 font-normal ' + (s === 'Valor' || s === 'Saldo' ? 'text-right' : '')} scope="col">{s}</th>)}</tr></thead>
+          <thead><tr>{['Movimentação','Valor','Data e hora','Saldo'].map(s => <th key={s} className={'rotulo-secao px-2 pb-3 ' + (s === 'Valor' || s === 'Saldo' ? 'text-right' : '')} scope="col">{s}</th>)}</tr></thead>
           <tbody>{historico.map(m => <tr key={m.transacao_id} className="border-t border-line"><td className="p-2">{tipos[m.tipo]}</td>
             <td className="num p-2 text-right">{moeda(m.valor)}</td><td className="num p-2">{instanteBR.format(new Date(m.instante))}</td><td className="num p-2 text-right">{moeda(m.saldo)}</td></tr>)}</tbody>
         </table></div> : <p className="text-muted">Nenhuma movimentação registrada.</p>}

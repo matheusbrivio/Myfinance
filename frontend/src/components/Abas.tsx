@@ -14,7 +14,7 @@ export type OpcaoAba = { valor: string; rotulo: string }
 export function Abas({ opcoes, valor, mudar, rotulo, id = 'abas' }: {
   opcoes: OpcaoAba[]; valor: string; mudar: (v: string) => void; rotulo: string; id?: string
 }): ReactNode {
-  return <div role="tablist" aria-label={rotulo} className="pilula-grupo glass">
+  return <div role="tablist" aria-label={rotulo} className="segmentado">
     {opcoes.map(o => <button key={o.valor} role="tab" type="button" aria-selected={o.valor === valor}
       className="pilula-item" onClick={() => mudar(o.valor)}>
       {o.valor === valor && <PilulaAtiva id={id}/>}

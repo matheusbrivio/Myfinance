@@ -3,7 +3,7 @@ import { motion, useAnimationControls, useReducedMotion } from 'motion/react'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ErroAPI, api } from '../services/api'
 import { dataBR, dataISO, moeda, tipos, valorAPI } from '../services/format'
-import { botao, campo, icone, primario, useAviso } from './ui'
+import { botaoTexto, campo, icone, primario, useAviso } from './ui'
 import { PilulaAtiva } from './Abas'
 import HoldButton from './HoldButton'
 
@@ -19,8 +19,10 @@ export type Campo = {
 const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 const tremor = { x: [0, -6, 6, -4, 3, 0], transition: { duration: 0.3 } }
 
-export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao }: {
+export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao, compacto = false }: {
   id: string; valor: string; mudar: (v: string) => void; invalido?: boolean; obrigatorio?: boolean; descricao?: string
+  /** Versão de 40px, para a barra de filtros. */
+  compacto?: boolean
 }) {
   const [aberto, setAberto] = useState(false)
   const [mes, setMes] = useState(() => {
@@ -33,9 +35,9 @@ export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao 
   const dias = new Date(mes.getFullYear(), mes.getMonth() + 1, 0).getDate()
   return <div className="relative">
     <div className="flex gap-2">
-      <input id={id} value={valor} onChange={e => mudar(e.target.value)} placeholder="DD/MM/AAAA" className={campo + ' num'}
+      <input id={id} value={valor} onChange={e => mudar(e.target.value)} placeholder="DD/MM/AAAA" className={campo + ' num' + (compacto ? ' h-10 px-3 text-sm' : '')}
         aria-invalid={invalido} aria-describedby={descricao} required={obrigatorio} inputMode="numeric"/>
-      <button type="button" ref={acionador} className={icone + ' size-11 shrink-0 border border-[rgba(15,23,42,.10)] bg-white/70'} aria-label="Abrir calendário"
+      <button type="button" ref={acionador} className={icone + (compacto ? ' size-10' : ' size-11') + ' shrink-0 border border-[rgba(15,23,42,.10)] bg-white/70'} aria-label="Abrir calendário"
         aria-expanded={aberto} onClick={() => setAberto(!aberto)}><CalendarDays size={18} aria-hidden/></button>
     </div>
     {aberto && <div className="glass mt-2 w-full max-w-72 rounded-[20px] p-3" onKeyDown={e => {
@@ -168,15 +170,15 @@ export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', su
         </div>
       })}
       {method === 'DELETE' ? <div className="grid gap-3 sm:col-span-2">
-        <HoldButton key={tentativaExclusao} size="lg" radius={16} holdTime={1200} releaseTime={200}
+        <HoldButton key={tentativaExclusao} size="lg" radius={12} holdTime={1200} releaseTime={200}
           backgroundColor="rgba(15,23,42,0.06)" fillColor="#E11D48" textColor="#0F172A" fillTextColor="#FFFFFF"
           doneLabel={verbo === 'encerrar' ? 'Encerrada' : 'Excluída'} resetAfter={0} disabled={enviando}
           className="w-full" onHold={() => { void enviar() }}>{verbo === 'encerrar' ? 'Segure para encerrar' : 'Segure para excluir'}</HoldButton>
         <p className="text-center text-sm text-muted">Segure por 1,2 s. Soltar antes cancela.</p>
-        {cancelar && <button type="button" className={botao} onClick={cancelar}>Cancelar</button>}
-      </div> : <div className={'grid gap-3 sm:col-span-2 ' + (cancelar ? 'grid-cols-3' : '')}>
-        {cancelar && <button type="button" className={botao} onClick={cancelar}>Cancelar</button>}
-        <button type="submit" className={primario + (cancelar ? ' col-span-2' : '')} disabled={enviando}>{enviando ? 'Enviando…' : rotuloSalvar}</button>
+        {cancelar && <button type="button" className={botaoTexto + ' justify-self-end'} onClick={cancelar}>Cancelar</button>}
+      </div> : <div className="flex items-center justify-end gap-2 pt-1 sm:col-span-2">
+        {cancelar && <button type="button" className={botaoTexto} onClick={cancelar}>Cancelar</button>}
+        <button type="submit" className={primario + ' min-w-28'} disabled={enviando}>{enviando ? 'Enviando…' : rotuloSalvar}</button>
       </div>}
     </fieldset>
   </motion.form>
