@@ -1,36 +1,49 @@
-import { useId, useState, type CSSProperties, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { ChevronDown } from 'lucide-react'
 
 // Matrix dot loader: grade 3x3 de pontos com onda diagonal.
 export function MatrizLoader() {
+  const reduz = useReducedMotion()
   return <span className="matriz" aria-hidden>{Array.from({ length: 9 }, (_, i) =>
-    <i key={i} style={{ '--i': (i % 3) + Math.floor(i / 3) } as CSSProperties}/>)}</span>
+    <motion.i key={i} initial={{ opacity: 0.25 }} animate={reduz ? { opacity: 0.6 } : { opacity: [0.2, 1, 0.2], scale: [1, 1.25, 1] }}
+      transition={reduz ? { duration: 0 } : { duration: 0.9, repeat: Infinity, ease: 'easeInOut', delay: ((i % 3) + Math.floor(i / 3)) * 0.09 }}/>)}</span>
 }
 
-// Skeleton loader: linhas com shimmer; somem quando os dados chegam.
+// Skeleton loader: linhas de vidro com brilho; somem quando os dados chegam.
 export function Esqueleto({ linhas = 4 }: { linhas?: number }) {
-  return <div aria-hidden className="grid gap-2">{Array.from({ length: linhas }, (_, i) =>
-    <div key={i} className="esq" style={{ '--i': i } as CSSProperties}/>)}</div>
+  const reduz = useReducedMotion()
+  return <div aria-hidden className="grid gap-3">{Array.from({ length: linhas }, (_, i) =>
+    <motion.div key={i} className="esq" initial={{ backgroundPosition: '120% 0' }}
+      animate={reduz ? undefined : { backgroundPosition: '-120% 0' }}
+      transition={{ duration: 1.4, repeat: Infinity, ease: 'linear', delay: i * 0.08 }}/>)}</div>
 }
 
-const cores = ['#7dd3fc', '#4ade80', '#fbbf24', '#fb7185', '#f6f8ff']
-// Confetti burst: só quando a meta chega a 100%. Posições fixas, sem aleatoriedade em render.
+const cores = ['#F0B27A', '#FFD3A8', '#8FD3F5', '#7EE2B8', '#F4F6F8']
+// Confetti burst: uma única vez, quando a meta chega a 100%. Posições fixas, sem aleatoriedade em render.
 export function Confete() {
   return <span aria-hidden className="confete">{Array.from({ length: 28 }, (_, i) => {
     const ang = (i / 28) * Math.PI * 2 + (i % 3) * 0.2
-    const dist = 70 + (i * 37) % 60
-    return <i key={i} style={{ '--dx': Math.round(Math.cos(ang) * dist) + 'px', '--dy': Math.round(Math.sin(ang) * dist - 20) + 'px',
-      '--r': (i * 47) % 360 + 'deg', background: cores[i % cores.length] } as CSSProperties}/>
+    const dist = 80 + (i * 37) % 70
+    return <motion.i key={i} style={{ background: cores[i % cores.length] }}
+      initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
+      animate={{ x: Math.round(Math.cos(ang) * dist), y: Math.round(Math.sin(ang) * dist - 20), rotate: (i * 47) % 360, opacity: 0 }}
+      transition={{ duration: 0.9, ease: [0.1, 0.7, 0.3, 1] }}/>
   })}</span>
 }
 
-// Accordion: altura animada por grid-template-rows, sem medir conteúdo.
+// Accordion: altura animada de 0 até auto.
 export function Acordeao({ titulo, children, aberto: inicial = true }: { titulo: string; children: ReactNode; aberto?: boolean }) {
   const [aberto, setAberto] = useState(inicial)
+  const reduz = useReducedMotion()
   const id = useId()
-  return <div className="acordeao" data-aberto={aberto}>
-    <h2 className="text-lg font-semibold"><button type="button" className="acordeao-gatilho" aria-expanded={aberto} aria-controls={id}
-      onClick={() => setAberto(!aberto)}>{titulo}<ChevronDown size={18} aria-hidden/></button></h2>
-    <div id={id} className="acordeao-corpo" role="region" aria-label={titulo} inert={!aberto}><div>{children}</div></div>
+  return <div className="acordeao">
+    <h2 className="titulo-card"><button type="button" className="acordeao-gatilho" aria-expanded={aberto} aria-controls={id}
+      onClick={() => setAberto(!aberto)}>{titulo}<motion.span animate={{ rotate: aberto ? 0 : -90 }} transition={{ duration: reduz ? 0 : 0.25 }} className="inline-grid"><ChevronDown size={20} aria-hidden/></motion.span></button></h2>
+    <motion.div id={id} role="region" aria-label={titulo} inert={!aberto} className="overflow-hidden"
+      initial={false} animate={aberto ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+      transition={{ duration: reduz ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}>
+      <div className="pt-4">{children}</div>
+    </motion.div>
   </div>
 }

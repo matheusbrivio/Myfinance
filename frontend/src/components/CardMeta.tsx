@@ -1,4 +1,4 @@
-import { useReduzMovimento } from '../hooks/useReduzMovimento'
+import { useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { dataBR, moeda } from '../services/format'
@@ -8,7 +8,7 @@ import { AnelProgresso } from './AnelProgresso'
 import { Confete } from './Efeitos'
 
 export function CardMeta({ meta, acoes = true }: { meta: Meta; acoes?: boolean }) {
-  const reduz = useReduzMovimento()
+  const reduz = useReducedMotion()
   const p = meta.progresso
   const concluida = Number(p.percentual) >= 100
   const [confete, setConfete] = useState(false)

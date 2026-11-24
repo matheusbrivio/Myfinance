@@ -54,10 +54,8 @@ body { margin: 0; min-width: 0; background: var(--bg); color: var(--text); font-
 .break-words { overflow-wrap: anywhere; }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 a, button, input, select, textarea { transition: background-color .16s, border-color .16s, color .16s; }
-@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
-@keyframes sair { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
+  *, *::before, *::after { transition-duration: 0s !important; }
 }
 
 /* Barra superior: logo, menu em pílula de vidro e CTA âmbar. */
@@ -87,43 +85,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 /* Números: mono + tabular-nums em todo valor monetário */
 .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 
-/* Spinning counter */
-.dig { display: inline-block; height: 1em; line-height: 1em; overflow: hidden; vertical-align: bottom; }
-.dig-col { display: flex; flex-direction: column; transform: translateY(calc(var(--d) * -1em));
-  animation: giro .4s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 22ms); }
-.dig-col > span { display: block; height: 1em; line-height: 1em; }
-@keyframes giro { from { transform: translateY(0); } }
-/* Number subtle change */
-.troca { display: inline-block; animation: troca .25s ease-out; }
-@keyframes troca { from { opacity: .35; transform: translateY(4px); filter: blur(1px); } }
-/* Number pop-in */
-.pop { display: inline-block; animation: pop .3s cubic-bezier(.3,1.6,.5,1); }
-@keyframes pop { from { opacity: 0; transform: scale(.85); } }
-/* Matrix dot loader */
-.carregando { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--color-muted); font-size: 14px; }
-.matriz { display: inline-grid; grid-template-columns: repeat(3, 5px); gap: 3px; }
-.matriz i { width: 5px; height: 5px; border-radius: 50%; background: var(--color-accent); opacity: .2;
-  animation: ponto .9s ease-in-out infinite; animation-delay: calc(var(--i) * 90ms); }
-@keyframes ponto { 40% { opacity: 1; transform: scale(1.25); } }
-/* Skeleton */
-.esq { height: 56px; border-radius: 12px; border: 1px solid var(--color-line);
-  background: linear-gradient(100deg, #0d1220 30%, #172036 50%, #0d1220 70%) 0 0 / 220% 100%;
-  animation: brilho 1.2s linear infinite; animation-delay: calc(var(--i) * 80ms); }
-@keyframes brilho { to { background-position: -220% 0; } }
-
-
-/* Accordion */
-.acordeao-gatilho { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
-.acordeao-gatilho svg { transition: rotate .25s; }
-.acordeao[data-aberto="false"] .acordeao-gatilho svg { rotate: -90deg; }
-.acordeao-corpo { display: grid; grid-template-rows: 1fr; margin-top: 12px; transition: grid-template-rows .3s cubic-bezier(.3,.8,.3,1), opacity .25s; }
-.acordeao-corpo > div { min-height: 0; overflow: hidden; }
-.acordeao[data-aberto="false"] .acordeao-corpo { grid-template-rows: 0fr; opacity: 0; margin-top: 0; }
-/* Confetti burst */
-.confete { position: absolute; left: 24px; top: 8px; width: 0; height: 0; pointer-events: none; }
-.confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; animation: confete .6s cubic-bezier(.1,.7,.3,1) forwards; }
-@keyframes confete { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
-.barra-meta { transition: width .3s ease-out; }
 
 /* Fundo líquido: fixo atrás de tudo; o conteúdo vive em vidro por cima. */
 .fundo { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); pointer-events: none; }
@@ -148,7 +109,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 .frase-hero em { font-family: var(--font-display); font-size: 1.5em; color: var(--accent); }
 .patrimonio { border-radius: 24px; padding: 20px 24px; min-width: 260px; }
 .vazio-dashboard { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; }
-.vazio-dashboard > img { filter: drop-shadow(0 0 18px rgba(95, 180, 224, .5)); }
 
 /* Barras */
 .trilho { height: 10px; border-radius: 999px; background: rgba(255, 255, 255, .06); overflow: hidden; }
@@ -221,3 +181,23 @@ select.campo { appearance: none; background-image: linear-gradient(45deg, transp
   background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
 select.campo option { background: #0b0f17; color: var(--text); }
 .check { flex: none; color: var(--income); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Números animados (spinning counter / cross-fade) */
+.num-anim { display: inline-block; }
+.digito { display: inline-block; height: 1.1em; line-height: 1.1em; overflow: hidden; vertical-align: bottom; }
+.digito-coluna { display: flex; flex-direction: column; }
+.digito-coluna > span { display: block; height: 1.1em; line-height: 1.1em; }
+
+/* Loaders */
+.carregando { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; color: var(--text-muted); font-size: 14px; }
+.matriz { display: inline-grid; grid-template-columns: repeat(3, 5px); gap: 3px; }
+.matriz i { width: 5px; height: 5px; border-radius: 50%; background: var(--available); }
+.esq { height: 64px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, .06);
+  background: linear-gradient(100deg, rgba(9,12,20,.55) 30%, rgba(255,255,255,.06) 50%, rgba(9,12,20,.55) 70%) 0 0 / 220% 100%; }
+
+/* Accordion, confete, logo elétrica */
+.acordeao-gatilho { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+.confete { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+.confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; }
+.logo-eletrica { position: relative; display: grid; place-items: center; flex: none; max-width: 100%; }
+.logo-estatica { filter: drop-shadow(0 0 22px rgba(95, 180, 224, .55)); }

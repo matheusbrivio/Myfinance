@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
+import { motion } from 'motion/react'
 import { PilulaAtiva } from '../components/Abas'
 import { FundoLiquido } from '../components/FundoLiquido'
 import { useQuery } from '../hooks/useQuery'
@@ -37,9 +38,9 @@ export function Layout() {
           </nav>
           <button type="button" className="cta" disabled={!cats.data} onClick={() => setNova(true)}>Nova transação <Plus size={18} aria-hidden/></button>
         </header>
-        <main key={pathname} id="principal" className="pagina">
+        <motion.main key={pathname} id="principal" className="pagina" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
           <Outlet/>
-        </main>
+        </motion.main>
       </div>
       <EdicaoRegistro edicao={nova ? { modo: 'novo' } : undefined} titulo="Nova transação" campos={camposTransacao(opcoes)}
         recurso="transacoes" fechar={() => setNova(false)} recarregar={() => setVersao(v => v + 1)}/>

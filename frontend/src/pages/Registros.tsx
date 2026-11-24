@@ -8,6 +8,7 @@ import { Entrada } from '../components/Entrada'
 import { Numero } from '../components/Numero'
 import { Cabecalho, Dialogo, Estado, Painel, botao, campo, icone, primario } from '../components/ui'
 import { useQuery } from '../hooks/useQuery'
+import { useUltimo } from '../hooks/useUltimo'
 import { useAtualizacao } from '../layouts/contexto'
 import { camposTransacao } from '../services/camposTransacao'
 import { api, todas } from '../services/api'
@@ -68,6 +69,7 @@ export function Transacoes() {
   const [params, setParams] = useSearchParams()
   const { versao } = useAtualizacao()
   const q = useQuery('transacoes?' + params + '#' + versao, signal => api<Lista<Transacao>>('transacoes/?' + params, { signal }))
+  const lista = useUltimo(q.data)
   const cats = useQuery('categorias', signal => todas<Categoria>('categorias/', signal))
   const [edicao, setEdicao] = useState<Edicao<Transacao>>()
   const opcoes = (cats.data ?? []).map(c => ({ valor: String(c.id), rotulo: c.nome }))
@@ -77,10 +79,10 @@ export function Transacoes() {
     tipo: item.tipo, categoria: item.categoria === null ? '' : String(item.categoria) }
   const titulo = edicao?.modo === 'editar' ? 'Editar transação' : edicao?.modo === 'excluir' ? 'Excluir transação' : 'Nova transação'
   const chaveFiltros = ['categoria','data_inicio','data_fim'].map(k => params.get(k) || '').join('|')
-  const itens = q.data?.resultados ?? []
-  const varias = (q.data?.total ?? 0) > itens.length
+  const itens = lista?.resultados ?? []
+  const varias = (lista?.total ?? 0) > itens.length
   const resumos = [
-    { rotulo: 'Transações', valor: String(q.data?.total ?? 0), cor: 'var(--text)', mono: false },
+    { rotulo: 'Transações', valor: String(lista?.total ?? 0), cor: 'var(--text)', mono: false },
     { rotulo: varias ? 'Entrou (nesta página)' : 'Entrou', valor: moeda(somar(itens.filter(t => t.tipo === 'receita').map(t => t.valor))), cor: 'var(--income)', mono: true },
     { rotulo: varias ? 'Saiu (nesta página)' : 'Saiu', valor: moeda(somar(itens.filter(t => t.tipo === 'despesa').map(t => t.valor))), cor: 'var(--expense)', mono: true },
   ]
@@ -95,13 +97,14 @@ export function Transacoes() {
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
     <Entrada agrupar className="mb-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">{resumos.map(r => <Painel key={r.rotulo}>
       <h2 className="rotulo-secao">{r.rotulo}</h2>
-      <p className={(r.mono ? 'num text-2xl' : 'serif text-4xl') + ' mt-2 break-all'} style={{ color: r.cor }}>{q.data ? <Numero texto={r.valor}/> : '—'}</p>
+      <p className={(r.mono ? 'num text-2xl' : 'serif text-4xl') + ' mt-2 break-all'} style={{ color: r.cor }}>{lista ? <Numero texto={r.valor}/> : '—'}</p>
     </Painel>)}</Entrada>
     <Entrada><Filtros key={chaveFiltros} params={params} opcoes={opcoes} setParams={setParams}/></Entrada>
-    {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={5}/> :
-      <Entrada><Painel><ListaTransacoes itens={q.data.resultados} acoes={item => <Acoes nome={item.descricao || 'transação de ' + moeda(item.valor)}
+    {q.error && lista && <Estado carregando={false} erro={q.error} tentar={q.reload}/>}
+    {!lista ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={5}/> :
+      <Entrada><Painel><ListaTransacoes itens={lista.resultados} acoes={item => <Acoes nome={item.descricao || 'transação de ' + moeda(item.valor)}
         editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>}/>
-        <Paginacao pagina={q.data.pagina} total={q.data.total} mudar={pagina => {
+        <Paginacao pagina={lista.pagina} total={lista.total} mudar={pagina => {
           const novos = new URLSearchParams(params)
           novos.set('pagina', String(pagina)); setParams(novos)
         }}/>

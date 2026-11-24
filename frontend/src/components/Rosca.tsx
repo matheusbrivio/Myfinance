@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { useReduzMovimento } from '../hooks/useReduzMovimento'
+import { motion, useReducedMotion } from 'motion/react'
 import { moeda } from '../services/format'
 import { distribuirDinheiro } from '../services/distribuicao'
 import type { Resumo } from '../types/financeiro'
@@ -14,18 +14,20 @@ class LimiteGrafico extends Component<{ children: ReactNode }, { falhou: boolean
 
 // 01 — Distribuição: rosca fina com pontas arredondadas, total de receitas no centro e legenda.
 export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
-  const reduz = useReduzMovimento()
+  const reduz = useReducedMotion()
   const distribuicao = distribuirDinheiro(saldos)
   const setores = distribuicao.estado === 'valido' ? distribuicao.segmentos.filter(s => s.proporcao > 0) : []
   return <Painel><Secao n="01" rotulo="Distribuição" titulo="Distribuição do dinheiro"/>
     {distribuicao.estado === 'vazio' ? <p className="text-muted">Nenhuma receita registrada para distribuir.</p> :
     <div className={distribuicao.estado === 'valido' ? 'grid items-center gap-6 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)]' : 'space-y-3'}>
       {distribuicao.estado === 'valido' ? <LimiteGrafico><div className="rosca relative mx-auto h-[250px] w-full max-w-[260px]">
+        <motion.div className="absolute inset-0" initial={reduz ? false : { rotate: -70, opacity: 0 }} whileInView={{ rotate: 0, opacity: 1 }}
+          viewport={{ once: true }} transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
         <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 250, height: 250 }}>
           <PieChart>
             <Pie data={setores} dataKey="proporcao" nameKey="nome" innerRadius={105} outerRadius={119} cornerRadius={7}
               paddingAngle={setores.length > 1 ? 5 : 0} startAngle={90} endAngle={-270}
-              stroke="none" isAnimationActive={!reduz} animationDuration={1400} animationEasing="ease-out">
+              stroke="none" isAnimationActive={false}>
               {setores.map(s => <Cell key={s.id} fill={s.cor}/>)}
             </Pie>
             <Tooltip content={({ active, payload }) => {
@@ -36,6 +38,7 @@ export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
             }}/>
           </PieChart>
         </ResponsiveContainer>
+        </motion.div>
         <div className="pointer-events-none absolute inset-0 grid place-content-center text-center">
           <span className="text-xs text-muted">Total de receitas</span>
           <strong className="serif max-w-36 break-all text-3xl">{moeda(saldos.receitas)}</strong>

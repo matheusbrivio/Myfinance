@@ -9,6 +9,9 @@ import { Rosca } from '../components/Rosca'
 import { Estado, Painel, Secao } from '../components/ui'
 import { Numero } from '../components/Numero'
 import { Entrada } from '../components/Entrada'
+import { Barra } from '../components/Barra'
+import { LogoEletrica } from '../components/LogoEletrica'
+import { useUltimo } from '../hooks/useUltimo'
 import type { Graficos, Resumo } from '../types/financeiro'
 import { distribuirDinheiro } from '../services/distribuicao'
 
@@ -28,14 +31,16 @@ export function Dashboard() {
   const { versao } = useAtualizacao()
   const q = useQuery('dashboard#' + versao, signal => api<Resumo>('resumo/', { signal }))
   const g = useQuery('graficos#' + versao, async signal => (await api<Graficos>('graficos/', { signal })) ?? null)
-  if (!q.data) return <><h1 className="sr-only">Dashboard</h1><Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/></>
-  const resumo = q.data
+  const graficos = useUltimo(g.data)
+  const resumo = useUltimo(q.data)
+  if (!resumo) return <><h1 className="sr-only">Dashboard</h1><Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/></>
   const distribuicao = distribuirDinheiro(resumo.saldos)
   const livre = distribuicao.estado === 'valido' ? distribuicao.segmentos[0].percentual : null
-  const despesas = g.data?.despesas_por_categoria ?? []
+  const despesas = graficos?.despesas_por_categoria ?? []
   const vazio = distribuicao.estado === 'vazio'
   return <div className="space-y-6">
     <h1 className="sr-only">Dashboard</h1>
+    {q.error && <Estado carregando={false} erro={q.error} tentar={q.reload}/>}
     <Entrada><section className="hero">
       <div>
         <h2 className="rotulo-hero">Saldo disponível<span> · {mesAno()}</span></h2>
@@ -48,7 +53,7 @@ export function Dashboard() {
       </div>
     </section></Entrada>
     {vazio && <Entrada><Painel className="vazio-dashboard">
-      <img src="/logo.svg" alt="" width={120} height={120}/>
+      <LogoEletrica tamanho={320}/>
       <div><h2 className="titulo-card">Comece registrando sua primeira receita</h2>
         <p className="mt-2 text-soft">Use o botão “Nova transação” no topo. Os gráficos e metas aparecem assim que houver movimento.</p></div>
     </Painel></Entrada>}
@@ -63,13 +68,13 @@ export function Dashboard() {
     <Entrada trigger="scroll" className="grid items-start gap-6 lg:grid-cols-2">
       <Painel><Secao n="03" rotulo="Transações recentes" titulo="Transações recentes"/><ListaTransacoes itens={resumo.recentes} rotulo="Transações recentes"/></Painel>
       <Painel><Secao n="04" rotulo="Metas em andamento" titulo="Metas em andamento"/>
-        {resumo.metas.length ? <ul className="grid gap-6">{resumo.metas.map(m => <li key={m.id}>
+        {resumo.metas.length ? <ul className="grid gap-6">{resumo.metas.map((m, i) => <li key={m.id}>
           <div className="flex items-baseline justify-between gap-4">
             <Link to={'/metas/' + m.id} className="break-words text-soft hover:text-text">{m.nome}</Link>
             <strong className="serif text-4xl font-normal text-accent">{m.progresso.percentual.replace('.', ',')}%</strong>
           </div>
           <div className="trilho trilho-fino" role="progressbar" aria-label={'Progresso de ' + m.nome} aria-valuenow={Number(m.progresso.barra)} aria-valuemin={0} aria-valuemax={100}>
-            <div className="barra-ambar" style={{ width: m.progresso.barra + '%' }}/>
+            <Barra className="barra-ambar" largura={Number(m.progresso.barra)} atraso={i * 0.1}/>
           </div>
           <p className="mt-2 text-sm text-muted"><span className="num">{moeda(m.progresso.acumulado)}</span> de <span className="num">{moeda(m.objetivo)}</span></p>
         </li>)}</ul> : <p className="text-muted">Nenhuma meta ativa.</p>}

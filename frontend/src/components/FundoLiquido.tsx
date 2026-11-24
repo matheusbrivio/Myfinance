@@ -5,6 +5,7 @@ const CORES = ['#1F5F73', '#6FB7D6', '#F0B27A']
 const consultas = ['(min-width: 768px)', '(prefers-reduced-motion: reduce)']
 
 function temWebGL2() {
+  if (typeof WebGL2RenderingContext === 'undefined') return false
   try { return !!document.createElement('canvas').getContext('webgl2') } catch { return false }
 }
 const casa = (c: string) => window.matchMedia?.(c).matches === true
