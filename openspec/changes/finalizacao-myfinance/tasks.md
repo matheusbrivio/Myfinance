@@ -31,6 +31,6 @@
 
 ## 8. Fechamento
 
-- [ ] 8.1 Atualizar o README (funcionalidades novas, dados de exemplo pelo botão e pelo comando, acesso pelo celular, atalho Ctrl+K e seção "Redesign" na tabela de etapas do OpenSpec com links para esta mudança).
+- [x] 8.1 Atualizar o README (funcionalidades novas, dados de exemplo pelo botão e pelo comando, acesso pelo celular, atalho Ctrl+K e seção "Redesign" na tabela de etapas do OpenSpec com links para esta mudança).
 - [ ] 8.2 Marcar as tarefas, rodar `openspec validate --all --strict` e arquivar a mudança.
 - [ ] 8.3 Rodar `npm ci`, `migrate` num banco novo, `npm run build`, `npm test`, `manage.py test`, `tests/browser/react.test.cjs`, `tests/browser/myfinance.test.cjs` e `openspec validate --all --strict`.
