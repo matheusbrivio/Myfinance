@@ -1,11 +1,15 @@
 import { type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { useEmTransicao } from '../layouts/transicao'
 
 export const mola = { type: 'spring', stiffness: 400, damping: 32 } as const
 
 // Fundo deslizante compartilhado por menu e abas: `layoutId` move a pílula entre os itens.
 export function PilulaAtiva({ id }: { id: string }) {
   const reduz = useReducedMotion()
+  // Durante a descida intro → app a cena inteira se move; sem layoutId a pílula não "persegue" a posição.
+  const emTransicao = useEmTransicao()
+  if (emTransicao) return <span aria-hidden className="pilula-ativa"/>
   return <motion.span aria-hidden layoutId={id} className="pilula-ativa" transition={reduz ? { duration: 0 } : mola}/>
 }
 

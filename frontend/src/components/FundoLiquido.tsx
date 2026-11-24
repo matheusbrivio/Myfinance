@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import LiquidEther from './LiquidEther'
 
 const CORES = ['#93C5FD', '#3B82F6', '#FDBA74']
@@ -12,7 +13,9 @@ const casa = (c: string) => window.matchMedia?.(c).matches === true
 // Fluido só em tela larga, sem reduced-motion e com WebGL2; senão, gradiente estático.
 function usarFluido() { return casa(consultas[0]) && !casa(consultas[1]) && temWebGL2() }
 
-export function FundoLiquido() {
+// noApp: a camada de pontos e manchas desliza -30vh no app (paralaxe da descida a partir da intro).
+export function FundoLiquido({ noApp = false }: { noApp?: boolean }) {
+  const reduz = useReducedMotion()
   const [fluido, setFluido] = useState(usarFluido)
   useEffect(() => {
     const ms = consultas.map(c => window.matchMedia?.(c))
@@ -25,10 +28,11 @@ export function FundoLiquido() {
       viscosity={0.3} resolution={0.3} autoDemo autoSpeed={0.2} autoIntensity={1.4} clickBurst={false}
       backgroundColor="#EEF1F5" maxDevicePixelRatio={1.5}/> : <div className="fundo-estatico"/>}
     {/* Camada de profundidade: manchas, grade de pontos e granulado (desliza na transição intro → app). */}
-    <div className="fundo-camada">
+    <motion.div className="fundo-camada" initial={false} animate={{ y: noApp && !reduz ? '-30vh' : 0 }}
+      transition={{ duration: reduz ? 0 : 1, ease: [0.76, 0, 0.24, 1] }}>
       <span className="fundo-mancha fundo-mancha-a"/><span className="fundo-mancha fundo-mancha-b"/>
       <span className="fundo-pontos"/>
-    </div>
+    </motion.div>
     <div className="fundo-veu"/>
     <span className="fundo-grao"/>
   </div>

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { ChartNoAxesCombined } from 'lucide-react'
 import { BotaoEntrar } from '../components/BotaoEntrar'
-import { FundoLiquido } from '../components/FundoLiquido'
 import type { LanyardProps } from '../components/Lanyard'
 
 // O Django só serve arquivos estáticos em /react-assets/: as imagens ficam em public/react-assets/intro.
@@ -63,17 +62,16 @@ export default function Intro() {
     return () => timers.forEach(t => window.clearTimeout(t))
   }, [tresD])
 
+  // A descida para o site é feita pelas Cenas (AnimatePresence na raiz das rotas).
   function entrar() {
     if (saindo) return
     setSaindo(true)
-    window.setTimeout(() => navigate('/dashboard'), reduz ? 0 : 350)
+    navigate('/dashboard')
   }
 
   const cursor = cursores.includes('grabbing') ? 'grabbing' : cursores.includes('grab') ? 'grab' : undefined
   return <div className="intro" style={{ cursor }}>
-    <FundoLiquido/>
-    <motion.div className="intro-conteudo" animate={saindo && !reduz ? { opacity: 0, y: -12, filter: 'blur(8px)' } : { opacity: saindo ? 0 : 1 }}
-      transition={{ duration: reduz ? 0 : 0.35, ease: [0.4, 0, 1, 1] }}>
+    <div className="intro-conteudo">
       <h1 className="sr-only">MyFinance</h1>
       {/* Marca d'água atrás dos crachás: dá profundidade e mostra o vidro. */}
       <span className="intro-marca-dagua" aria-hidden>MyFinance</span>
@@ -102,6 +100,6 @@ export default function Intro() {
       <div className="intro-texto">
         <BotaoEntrar aoEntrar={entrar}/>
       </div>
-    </motion.div>
+    </div>
   </div>
 }

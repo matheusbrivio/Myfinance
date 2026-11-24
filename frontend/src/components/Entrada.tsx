@@ -1,5 +1,6 @@
 import { Children, type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { useEmTransicao } from '../layouts/transicao'
 
 const suave = [0.16, 1, 0.3, 1] as const
 // filter diferente de none num ancestral desliga o backdrop-filter do vidro: limpa ao terminar.
@@ -10,9 +11,11 @@ export function Entrada({ agrupar = false, trigger = 'mount', delay = 0, classNa
   agrupar?: boolean; trigger?: 'mount' | 'scroll'; delay?: number; className?: string; children: ReactNode
 }) {
   const reduz = useReducedMotion()
+  // Durante a descida intro → app, os blocos esperam a cena parar para entrar.
+  const esperando = useEmTransicao()
   const variante = (atraso: number) => reduz ? {} : ({
     initial: { opacity: 0, y: 18, filter: 'blur(6px)' },
-    ...(trigger === 'scroll'
+    ...(esperando ? {} : trigger === 'scroll'
       ? { whileInView: nitido, viewport: { once: true, margin: '0px 0px -8% 0px' } }
       : { animate: nitido }),
     transition: { duration: 0.9, ease: suave, delay: atraso },

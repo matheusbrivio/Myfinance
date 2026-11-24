@@ -3,7 +3,6 @@ import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Plus, Tags } from 'lu
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { motion } from 'motion/react'
 import { PilulaAtiva } from '../components/Abas'
-import { FundoLiquido } from '../components/FundoLiquido'
 import { useQuery } from '../hooks/useQuery'
 import { useUltimo } from '../hooks/useUltimo'
 import { todas } from '../services/api'
@@ -28,12 +27,11 @@ export function Layout() {
   const opcoes = (cats ?? []).map(c => ({ valor: String(c.id), rotulo: c.nome }))
   return <AtualizacaoContext.Provider value={{ versao }}>
     <div className="min-h-screen">
-      <FundoLiquido/>
       <div className="app">
         {/* Uma única barra de vidro, fixa no topo. No celular o menu vai para uma barra no rodapé. */}
         <div className="container-app barra-fixa">
           <header className="barra">
-            <NavLink to="/dashboard" className="marca" aria-label="MyFinance, ir para o Dashboard">
+            <NavLink to="/" className="marca" aria-label="MyFinance, voltar para a introdução">
               <span className="marca-icone"><ChartNoAxesCombined size={18} aria-hidden/></span><span>MyFinance</span>
             </NavLink>
             <nav aria-label="Principal" className="menu">
