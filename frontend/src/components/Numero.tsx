@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { useReducedMotion } from 'motion/react'
+import { useReduzMovimento } from '../hooks/useReduzMovimento'
 
 const digitos = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 // Spinning counter na abertura; number subtle change nas trocas seguintes.
 // O texto final fica em sr-only: leitores de tela e testes enxergam o valor real.
 export function Numero({ texto, className = '' }: { texto: string; className?: string }) {
-  const reduz = useReducedMotion()
+  const reduz = useReduzMovimento()
   const [fase, setFase] = useState<'giro' | 'estavel'>('giro')
   const anterior = useRef(texto)
   useEffect(() => {

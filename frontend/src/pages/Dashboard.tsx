@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { useReducedMotion } from 'motion/react'
+import { useReduzMovimento } from '../hooks/useReduzMovimento'
 import { api } from '../services/api'
 import { moeda } from '../services/format'
 import { useQuery } from '../hooks/useQuery'
@@ -17,7 +17,7 @@ class LimiteGrafico extends Component<{ children: ReactNode }, { falhou: boolean
   render() { return this.state.falhou ? <p className="text-muted">O gráfico está indisponível. Consulte a legenda.</p> : this.props.children }
 }
 function Grafico({ saldos }: { saldos: Resumo['saldos'] }) {
-  const reduz = useReducedMotion()
+  const reduz = useReduzMovimento()
   const distribuicao = distribuirDinheiro(saldos)
   const setores = distribuicao.estado === 'valido' ? distribuicao.segmentos.filter(s => s.proporcao > 0) : []
   return <Painel><h2 className="mb-2 text-lg font-semibold">Distribuição do dinheiro</h2>

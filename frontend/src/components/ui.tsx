@@ -1,6 +1,5 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import * as Toast from '@radix-ui/react-toast'
-import { motion, useReducedMotion } from 'motion/react'
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
 import { CircleAlert, X } from 'lucide-react'
 import { Esqueleto, MatrizLoader } from './Efeitos'
@@ -11,8 +10,7 @@ export const campo = 'w-full rounded-[10px] border border-line bg-base px-3 py-2
 export const painel = 'min-w-0 rounded-xl border border-line bg-panel/95 p-5'
 
 export function Painel({ children, className = '' }: { children: ReactNode; className?: string }) {
-  const reduz = useReducedMotion()
-  return <motion.section className={painel + ' ' + className} initial={reduz ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduz ? 0 : .18 }}>{children}</motion.section>
+  return <section className={painel + ' ' + className}>{children}</section>
 }
 export function Dialogo({ titulo, aberto, onOpenChange, children }: {
   titulo: string; aberto: boolean; onOpenChange: (open: boolean) => void; children: ReactNode

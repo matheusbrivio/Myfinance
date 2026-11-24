@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'motion/react'
+import { useReduzMovimento } from '../hooks/useReduzMovimento'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { dataBR, moeda } from '../services/format'
@@ -8,7 +8,7 @@ import { Confete } from './Efeitos'
 import { PercentualPop } from './Numero'
 
 export function CardMeta({ meta }: { meta: Meta }) {
-  const reduz = useReducedMotion()
+  const reduz = useReduzMovimento()
   const p = meta.progresso
   const [confete, setConfete] = useState(false)
   useEffect(() => {
@@ -25,7 +25,7 @@ export function CardMeta({ meta }: { meta: Meta }) {
     <div className="flex items-start justify-between gap-3"><h2 className="min-w-0 break-words text-lg font-semibold">{meta.nome}</h2><span className="shrink-0 text-xs text-muted">{meta.arquivada_em ? 'Arquivada' : p.status}</span></div>
     <p className="mt-3 break-all text-sm text-muted"><strong className="num text-white">{moeda(p.acumulado)}</strong> de {moeda(meta.objetivo)}</p>
     <div className="my-3 h-2 overflow-hidden rounded-full bg-line" role="progressbar" aria-label={'Progresso de ' + meta.nome} aria-valuenow={Number(p.barra)} aria-valuemin={0} aria-valuemax={100}>
-      <motion.div className="h-full origin-left rounded-full bg-gradient-to-r from-sky-400 to-violet-400" initial={reduz ? false : { width: 0 }} animate={{ width: p.barra + '%' }} transition={{ duration: reduz ? 0 : .3 }} />
+      <div className="barra-meta h-full rounded-full bg-gradient-to-r from-sky-400 to-violet-400" style={{ width: p.barra + '%' }}/>
     </div>
     <p className="relative text-sm"><PercentualPop texto={p.percentual.replace('.', ',') + '%'}/> · {p.dias} dias restantes{confete && <Confete/>}</p>
     <p className="mt-1 text-sm text-muted">Prazo {dataBR(meta.prazo)} · Aporte mensal {p.mensal === null ? 'indisponível' : moeda(p.mensal)}</p>
