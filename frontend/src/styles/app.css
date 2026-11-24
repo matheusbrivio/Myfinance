@@ -82,8 +82,7 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   .cta { margin-left: auto; }
 }
 @media (max-width: 767px) { .barra { padding: 16px 16px 8px; } }
-/* clip: o brilho do canvas do Pico de gastos passa da borda do card e não pode criar rolagem horizontal. */
-.pagina { margin: 0 auto; width: 100%; max-width: 1320px; padding: 8px 40px 64px; overflow-x: clip; }
+.pagina { margin: 0 auto; width: 100%; max-width: 1320px; padding: 8px 40px 64px; }
 @media (max-width: 767px) { .pagina { padding: 8px 16px 48px; } }
 
 /* Números: mono + tabular-nums em todo valor monetário */

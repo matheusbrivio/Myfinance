@@ -157,7 +157,7 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
       await pagina.setViewportSize({width,height:850})
       const largura = await pagina.evaluate(() => ({
         pagina: document.documentElement.scrollWidth, janela: document.documentElement.clientWidth,
-        elementos: [...document.querySelectorAll('main *')].filter(e => e.getBoundingClientRect().right > innerWidth + 2 && !e.closest('table') && !(e.tagName === 'CANVAS' && e.closest('[data-peak-chart]'))).slice(0,8).map(e => e.tagName + ':' + e.getAttribute('class')),
+        elementos: [...document.querySelectorAll('main *')].filter(e => e.getBoundingClientRect().right > innerWidth + 2 && !e.closest('table')).slice(0,8).map(e => e.tagName + ':' + e.getAttribute('class')),
       }))
       assert.ok(largura.pagina <= largura.janela, 'rolagem horizontal em ' + width + ': ' + JSON.stringify(largura))
     }
