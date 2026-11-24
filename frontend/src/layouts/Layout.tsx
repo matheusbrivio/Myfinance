@@ -2,7 +2,6 @@ import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Tags } from 'lucide-r
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useDeslizante } from '../components/Abas'
 import { Entrada } from '../components/Entrada'
-import { Fundo } from '../components/Fundo'
 
 const paginas = [
   { caminho: '/', titulo: 'Visão geral', icone: LayoutDashboard },
@@ -15,7 +14,6 @@ export function Layout() {
   const pagina = paginas.find(p => p.caminho === pathname || (p.caminho !== '/' && pathname.startsWith(p.caminho + '/')))
   const { ref, indicador } = useDeslizante('[aria-current="page"]', pathname)
   return <div className="min-h-screen">
-    <Fundo/>
     <header className="topbar">
       <NavLink to="/" className="marca"><ChartNoAxesCombined className="text-accent" size={18} aria-hidden/><span>MyFinance</span></NavLink>
       <nav aria-label="Principal" ref={ref} className="nav">

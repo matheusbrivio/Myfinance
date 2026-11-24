@@ -1,21 +1,54 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
+@import "@fontsource/instrument-serif/latin-400.css";
+@import "@fontsource/instrument-serif/latin-ext-400.css";
+@import "@fontsource/instrument-serif/latin-400-italic.css";
+@import "@fontsource/instrument-serif/latin-ext-400-italic.css";
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Geist Variable", "Segoe UI", system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, Consolas, monospace;
-  --color-base: #070a12;
-  --color-panel: #0d1220;
-  --color-line: #1d2740;
-  --color-muted: #8a97b3;
-  --color-accent: #7dd3fc;
-  --color-good: #4ade80;
-  --color-bad: #fb7185;
-  --color-warn: #fbbf24;
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --color-base: #05070C;
+  --color-panel: #0b0f17;
+  --color-line: rgba(255, 255, 255, .07);
+  --color-muted: #9FB0C1;
+  --color-soft: #CBD5DF;
+  --color-pill: #F4F6F8;
+  --color-accent: #F0B27A;
+  --color-good: #7EE2B8;
+  --color-bad: #FF9E8A;
+  --color-warn: #F0B27A;
+  --color-available: #8FD3F5;
+  --color-danger-fill: #D9503A;
 }
-:root { color-scheme: dark; }
-body { margin: 0; min-width: 0; background: var(--color-base); color: #e8edf8; font-family: var(--font-sans); }
+:root {
+  color-scheme: dark;
+  --bg: #05070C; --text: #EEF2F6; --text-soft: #CBD5DF; --text-muted: #9FB0C1;
+  --pill: #F4F6F8; --accent: #F0B27A; --income: #7EE2B8; --expense: #FF9E8A;
+  --available: #8FD3F5; --danger-fill: #D9503A; --line: rgba(255, 255, 255, .07);
+  --ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* Vidro escuro: base de todo painel. */
+.glass {
+  background: rgba(9, 12, 20, .58);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, .09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 30px 80px -30px rgba(0, 0, 0, .7);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(9, 12, 20, .88); }
+}
+.glass-modal { background: rgba(9, 12, 20, .62); backdrop-filter: blur(28px) saturate(150%); -webkit-backdrop-filter: blur(28px) saturate(150%); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-modal { background: rgba(9, 12, 20, .88); }
+}
+.serif { font-family: var(--font-display); font-weight: 400; }
+
+body { margin: 0; min-width: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 15px; }
 .num, td.num, .tabular-nums { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .break-words { overflow-wrap: anywhere; }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
@@ -25,14 +58,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
 }
-
-/* Fundo ASCII: topo vívido, resto escurecido. Conteúdo fica em cards opacos. */
-.fundo { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--color-base); pointer-events: none; }
-.fundo-ascii { position: absolute; inset: 0; }
-.fundo-estatico { position: absolute; inset: 0; background:
-  radial-gradient(120% 60% at 50% 0%, #38bdf8 0%, #1e3fd8 38%, transparent 72%); opacity: .55; }
-.fundo-mascara { position: absolute; inset: 0; background:
-  linear-gradient(to bottom, rgb(7 10 18 / 0) 0, rgb(7 10 18 / .25) 140px, rgb(7 10 18 / .93) 380px, rgb(7 10 18 / .93) 100%); }
 
 /* Topbar flutuante (desktop) e tab bar inferior (mobile) */
 .topbar { position: sticky; top: 12px; z-index: 30; margin: 12px auto 0; width: min(1200px, calc(100% - 24px));
@@ -127,6 +152,3 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 .confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; animation: confete .6s cubic-bezier(.1,.7,.3,1) forwards; }
 @keyframes confete { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
 .barra-meta { transition: width .3s ease-out; }
-/* Faixa do GlowCursor: só o topo vívido; sem captura de ponteiro. */
-.fundo-faixa { position: absolute; top: 0; left: 0; right: 0; height: 340px; pointer-events: none; }
-.fundo-faixa .glow-cursor, .fundo-faixa canvas { pointer-events: none; }
