@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router'
 import { SeletorMes, chaveMes, mesValido } from '../components/SeletorMes'
 import { BoasVindas } from '../components/BoasVindas'
+import { ResumoMes } from '../components/ResumoMes'
 import { api } from '../services/api'
 import { moeda } from '../services/format'
 import { useQuery } from '../hooks/useQuery'
@@ -13,7 +14,7 @@ import { Numero } from '../components/Numero'
 import { Entrada } from '../components/Entrada'
 import { Barra } from '../components/Barra'
 import { useUltimo } from '../hooks/useUltimo'
-import type { Graficos, Resumo } from '../types/financeiro'
+import type { Graficos, Insight, Resumo } from '../types/financeiro'
 import { distribuirDinheiro } from '../services/distribuicao'
 
 // Mini-indicadores do hero (substituem os cards de KPI separados).
@@ -30,10 +31,11 @@ function Saldo({ texto }: { texto: string }) {
 
 /*
  * Bento em grade de 12 colunas:
- *   hero (8) + distribuição (4)
- *   transações recentes (8, duas linhas) + por categoria (4) / metas (4)
- * Até 1024px a distribuição desce para baixo do hero e categoria/metas ficam lado a lado;
- * até 768px, uma coluna só.
+ *   hero (8) + resumo do mês (4)
+ *   distribuição (4) + por categoria (4) + metas (4)
+ *   transações recentes (12)
+ * Até 1024px o resumo desce para baixo do hero; distribuição e por categoria ficam lado a lado
+ * e metas ocupa a linha seguinte. Até 768px, uma coluna só.
  */
 export function Dashboard() {
   const { versao } = useAtualizacao()
@@ -48,7 +50,10 @@ export function Dashboard() {
   }
   const q = useQuery(`dashboard#${mes}#${versao}`, signal => api<Resumo>('resumo/?mes=' + mes, { signal }))
   const g = useQuery(`graficos#${mes}#${versao}`, async signal => (await api<Graficos>('graficos/?mes=' + mes, { signal })) ?? null)
+  const ins = useQuery(`insights#${mes}#${versao}`, async signal => (await api<Insight[]>('insights/?mes=' + mes, { signal })) ?? [])
   const graficos = useUltimo(g.data)
+  // Erro nos insights não derruba o dashboard: só o card mostra o erro.
+  const insights = Array.isArray(ins.data) ? ins.data : undefined
   const resumo = useUltimo(q.data)
   if (!resumo) return <><h1 className="sr-only">Dashboard</h1><Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/></>
   // Distribuição do mês: receitas do mês em despesas, reservado líquido e sobra.
@@ -79,18 +84,17 @@ export function Dashboard() {
       </div>)}</dl>
     </Painel></Entrada>
 
-    <Entrada className="col-span-12 bento:col-span-4 self-stretch" delay={0.06}><Rosca saldos={base} mensal={!!resumo.mes}/></Entrada>
+    <Entrada className="col-span-12 bento:col-span-4 self-stretch" delay={0.06}><ResumoMes itens={insights} erro={ins.error} tentar={ins.reload}/></Entrada>
 
-    <Entrada className="col-span-12 bento:col-span-8 bento:row-span-2 self-stretch" delay={0.1} trigger="scroll">
-      <Painel className="h-full"><CabecalhoCard titulo="Transações recentes" acao={resumo.recentes.length > 0 && <VerTodas para="/transacoes" rotulo="Ver todas as transações"/>}/>
-        <ListaTransacoes itens={resumo.recentes} rotulo="Transações recentes"/></Painel>
+    <Entrada className={'col-span-12 tab:col-span-6 self-stretch ' + (despesas.length > 0 ? 'bento:col-span-4' : 'bento:col-span-6')} delay={0.1} trigger="scroll">
+      <Rosca saldos={base} mensal={!!resumo.mes}/>
     </Entrada>
 
-    {despesas.length > 0 && <Entrada className="col-span-12 tab:col-span-6 bento:col-span-4" delay={0.14} trigger="scroll">
+    {despesas.length > 0 && <Entrada className="col-span-12 tab:col-span-6 bento:col-span-4 self-stretch" delay={0.14} trigger="scroll">
       <BarrasCategoria dados={despesas} total={resumo.saldos.despesas}/>
     </Entrada>}
 
-    <Entrada className={'col-span-12 bento:col-span-4 ' + (despesas.length > 0 ? 'tab:col-span-6' : '')} delay={0.18} trigger="scroll">
+    <Entrada className={'col-span-12 self-stretch ' + (despesas.length > 0 ? 'tab:col-span-12 bento:col-span-4' : 'tab:col-span-6 bento:col-span-6')} delay={0.18} trigger="scroll">
       <Painel><CabecalhoCard titulo="Metas" acao={metas.length > 0 && <VerTodas para="/metas" rotulo="Ver todas as metas"/>}/>
         {metas.length ? <ul className="grid gap-5">{metas.map((m, i) => <li key={m.id}>
           <div className="flex items-baseline justify-between gap-4 text-sm">
@@ -103,6 +107,11 @@ export function Dashboard() {
           <p className="mt-1.5 text-xs text-muted"><span className="num">{moeda(m.progresso.acumulado)}</span> de <span className="num">{moeda(m.objetivo)}</span></p>
         </li>)}</ul> : <p className="text-sm text-muted">Nenhuma meta ativa.</p>}
       </Painel>
+    </Entrada>
+
+    <Entrada className="col-span-12" delay={0.22} trigger="scroll">
+      <Painel><CabecalhoCard titulo="Transações recentes" acao={resumo.recentes.length > 0 && <VerTodas para="/transacoes" rotulo="Ver todas as transações"/>}/>
+        <ListaTransacoes itens={resumo.recentes} rotulo="Transações recentes"/></Painel>
     </Entrada>
   </div>
 }

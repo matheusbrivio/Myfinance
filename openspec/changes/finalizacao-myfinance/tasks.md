@@ -15,7 +15,7 @@
 
 ## 4. Insights do mês
 
-- [ ] 4.1 Implementar `GET /api/v1/insights/?mes=AAAA-MM` com as regras de variação por categoria, taxa de economia, projeção de meta e maior gasto, em ordem de prioridade e com no máximo três itens; card "Resumo do mês" no dashboard. Testar cada regra, inclusive quando ela não aparece.
+- [x] 4.1 Implementar `GET /api/v1/insights/?mes=AAAA-MM` com as regras de variação por categoria, taxa de economia, projeção de meta e maior gasto, em ordem de prioridade e com no máximo três itens; card "Resumo do mês" no dashboard. Testar cada regra, inclusive quando ela não aparece.
 
 ## 5. Exportar CSV e busca rápida
 

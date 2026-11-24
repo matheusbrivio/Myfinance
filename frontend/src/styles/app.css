@@ -321,3 +321,9 @@ select.campo option { background: #fff; color: var(--text); }
 .seletor-mes-seta:hover:not(:disabled) { background: var(--pill); color: var(--text); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
 .seletor-mes-seta:disabled { opacity: .35; cursor: default; }
 .seletor-mes-nome { min-width: 9.5em; padding: 0 6px; text-align: center; font-size: 13px; font-weight: 500; color: var(--text); }
+
+/* Resumo do mês: ícone de 32px pelo tom da frase */
+.insight-icone { display: grid; flex: none; place-items: center; width: 32px; height: 32px; border-radius: 50%; }
+.insight-positivo { color: var(--income); background: rgba(5, 150, 105, .12); }
+.insight-alerta { color: var(--goal-text); background: rgba(217, 119, 6, .14); }
+.insight-neutro { color: var(--text-soft); background: var(--track); }

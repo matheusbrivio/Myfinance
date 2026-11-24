@@ -19,7 +19,7 @@ from transacoes.saldos import saldos
 
 from .exemplo import BaseComDados, popular_exemplo
 from .http import Conflito, envelope, idempotente
-from . import mensal
+from . import insights as regras_insights, mensal
 from .projecoes import dinheiro, graficos, meta_json, reservas
 from .serializers import (
     CONVENCIONAIS, CategoriaSerializer, FiltroSerializer, MetaSerializer,
@@ -258,3 +258,11 @@ class Exemplo(JSONView):
             return Response(popular_exemplo(), status=201)
         except BaseComDados as erro:
             raise Conflito(str(erro))
+
+
+class Insights(JSONView):
+    """Até 3 frases do mês (ver api/insights.py). Sem `mes`, o mês atual."""
+
+    def get(self, request):
+        periodo = mensal.periodo_da_requisicao(request) or regras_insights.mes_atual()
+        return Response(regras_insights.insights(*periodo))

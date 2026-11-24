@@ -57,8 +57,8 @@ DESPESAS = [
 ]
 # Metas: uma em andamento com aportes regulares, uma concluída e uma recém-criada.
 METAS = {
-    "reserva": {"nome": "Reserva de emergência", "descricao": "Três meses de gastos guardados.",
-                "objetivo": "6000.00", "prazo_meses": 14},
+    "reserva": {"nome": "Reserva de emergência", "descricao": "Dois meses de gastos guardados.",
+                "objetivo": "3000.00", "prazo_meses": 12},
     "viagem": {"nome": "Viagem de fim de ano", "descricao": "Passagens e hospedagem.",
                "objetivo": "800.00", "prazo_meses": 2},
 }
@@ -70,7 +70,7 @@ APORTES = [
     (0, 6, "reserva", "200.00"),
 ]
 META_NOVA = {"nome": "Notebook novo", "descricao": "Para os trabalhos da faculdade.",
-             "objetivo": "4500.00", "prazo_meses": 10, "inicial": "120.00"}
+             "objetivo": "4500.00", "prazo_meses": 18, "inicial": "120.00"}
 
 
 class BaseComDados(Exception):

@@ -53,6 +53,23 @@ test('sobra negativa do mês aparece sem percentuais', async () => {
   expect(legenda.textContent).not.toContain('%')
 })
 
+test('mostra o resumo do mês ao lado do hero, e só o card falha se os insights falharem', async () => {
+  const resumo = { saldos: { disponivel:'0.00', patrimonio:'0.00', reservado:'0.00', receitas:'0.00', despesas:'0.00' }, recentes:[], metas:[] }
+  mock.mockImplementation(async (caminho: string) => caminho.startsWith('insights/')
+    ? [{ tipo: 'maior_gasto', tom: 'neutro', texto: 'Seu maior gasto foi Aluguel (R$ 750,00), no dia 10.' }]
+    : caminho.startsWith('resumo/') ? resumo : null)
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
+  expect(await screen.findByText('Seu maior gasto foi Aluguel (R$ 750,00), no dia 10.')).toBeTruthy()
+  cleanup()
+  mock.mockImplementation(async (caminho: string) => {
+    if (caminho.startsWith('insights/')) throw new Error('falhou')
+    return caminho.startsWith('resumo/') ? resumo : null
+  })
+  render(<MemoryRouter><Dashboard/></MemoryRouter>)
+  expect(await screen.findByText('Não foi possível calcular o resumo do mês.')).toBeTruthy()
+  expect(screen.getByText('Saldo disponível')).toBeTruthy()
+})
+
 test('usa o saldo disponível real com precisão de centavos', () => {
   const resultado = distribuirDinheiro({
     receitas: '2500.00', despesas: '1200.23', reservado: '550.00', disponivel: '749.77', patrimonio: '1299.77',

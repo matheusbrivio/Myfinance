@@ -8,6 +8,7 @@ urlpatterns = [
     path("resumo/", views.Resumo.as_view()),
     path("graficos/", views.Graficos.as_view()),
     path("exemplo/", views.Exemplo.as_view()),
+    path("insights/", views.Insights.as_view()),
     path("categorias/", views.Categorias.as_view()),
     path("categorias/<int:pk>/", views.Categorias.as_view()),
     path("transacoes/", views.Transacoes.as_view()),
