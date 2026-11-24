@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { CardMeta } from '../components/CardMeta'
 import { Formulario, type Campo } from '../components/Formulario'
+import { Acordeao } from '../components/Efeitos'
 import { Dialogo, Estado, Painel, botao, primario } from '../components/ui'
 import { useQuery } from '../hooks/useQuery'
 import { api, todas } from '../services/api'
@@ -53,13 +54,13 @@ export function DetalheMeta() {
       <button className={botao} onClick={() => setEdicao('editar')}>Editar meta</button>
       <button className={botao + ' text-bad'} onClick={() => setEdicao('excluir')}>{historico.length ? 'Encerrar meta' : 'Excluir meta'}</button>
     </div>}
-    <Painel><h2 className="mb-3 text-lg font-semibold">Histórico da meta</h2>
+    <Painel><Acordeao titulo="Histórico da meta">
       {historico.length ? <div className="overflow-x-auto"><table className="w-full text-left text-sm">
-        <thead><tr>{['Movimentação','Valor','Data e hora','Saldo'].map(s => <th key={s} className="p-2" scope="col">{s}</th>)}</tr></thead>
+        <thead><tr>{['Movimentação','Valor','Data e hora','Saldo'].map(s => <th key={s} className={'p-2 font-mono text-xs font-medium uppercase tracking-wider ' + (s === 'Valor' || s === 'Saldo' ? 'text-right' : '')} scope="col">{s}</th>)}</tr></thead>
         <tbody>{historico.map(m => <tr key={m.transacao_id} className="border-t border-line"><td className="p-2">{tipos[m.tipo]}</td>
-          <td className="p-2">{moeda(m.valor)}</td><td className="p-2">{instanteBR.format(new Date(m.instante))}</td><td className="p-2">{moeda(m.saldo)}</td></tr>)}</tbody>
+          <td className="num p-2 text-right">{moeda(m.valor)}</td><td className="num p-2">{instanteBR.format(new Date(m.instante))}</td><td className="num p-2 text-right">{moeda(m.saldo)}</td></tr>)}</tbody>
       </table></div> : <p className="text-muted">Nenhuma movimentação registrada.</p>}
-    </Painel>
+    </Acordeao></Painel>
     <EdicaoRegistro edicao={edicao ? { modo: edicao, item: meta } : undefined}
       titulo={edicao === 'editar' ? 'Editar meta' : historico.length ? 'Encerrar meta' : 'Excluir meta'}
       campos={campos} inicial={{nome:meta.nome, descricao:meta.descricao, objetivo:meta.objetivo, prazo:meta.prazo}}

@@ -50,9 +50,11 @@ export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', su
   const [erros, setErros] = useState<Record<string, string[]>>({})
   const [erroGeral, setErroGeral] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [treme, setTreme] = useState(false)
   const pendente = useRef(false)
   const tentativa = useRef<{ corpo: string; chave: string } | undefined>(undefined)
   const aviso = useAviso()
+  function tremer() { setTreme(true); window.setTimeout(() => setTreme(false), 350) }
   async function enviar(event: FormEvent) {
     event.preventDefault()
     if (pendente.current) return
@@ -76,17 +78,19 @@ export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', su
       if (erro instanceof ErroAPI && Object.keys(erro.campos).length) {
         setErros(erro.campos)
         setErroGeral(erro.message)
+        tremer()
       } else {
         const texto = erro instanceof Error ? erro.message : 'Não foi possível salvar.'
         setErroGeral(texto)
         aviso(texto, 'erro')
+        tremer()
       }
     } finally {
       pendente.current = false
       setEnviando(false)
     }
   }
-  return <form onSubmit={enviar} className="space-y-4" aria-busy={enviando}>
+  return <form onSubmit={enviar} className={'space-y-4' + (treme ? ' treme' : '')} aria-busy={enviando}>
     {erroGeral && <p role="alert" className="text-sm text-bad">{erroGeral}</p>}
     {method === 'DELETE' && <p>Confirma esta operação?</p>}
     <fieldset disabled={enviando} className="space-y-4">

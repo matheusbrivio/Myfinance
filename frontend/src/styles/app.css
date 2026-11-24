@@ -20,9 +20,6 @@ body { margin: 0; min-width: 0; background: var(--color-base); color: #e8edf8; f
 .break-words { overflow-wrap: anywhere; }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 a, button, input, select, textarea { transition: background-color .16s, border-color .16s, color .16s; }
-.dialogo[data-state="open"], .dialogo-fundo[data-state="open"] { animation: aparecer .16s ease-out; }
-.dialogo[data-state="closed"], .dialogo-fundo[data-state="closed"], .aviso[data-state="closed"] { animation: sair .16s ease-in both; }
-.aviso[data-state="open"] { animation: aparecer .16s ease-out; }
 @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
 @keyframes sair { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
@@ -101,3 +98,35 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 .aba[aria-selected="true"] { color: var(--color-accent); }
 .abas .indicador { border-radius: 9px; }
 .rotulo { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); }
+
+/* Modal open/close */
+.dialogo-fundo[data-state="open"] { animation: aparecer .2s ease-out; }
+.dialogo-fundo[data-state="closed"] { animation: sair .15s ease-in both; }
+.dialogo[data-state="open"] { animation: modal-entra .22s cubic-bezier(.2,.9,.3,1); }
+.dialogo[data-state="closed"] { animation: modal-sai .15s ease-in both; }
+@keyframes modal-entra { from { opacity: 0; scale: .96; translate: 0 8px; } }
+@keyframes modal-sai { to { opacity: 0; scale: .97; translate: 0 4px; } }
+/* Toast open/close */
+.aviso[data-state="open"] { animation: toast-entra .25s cubic-bezier(.2,.9,.3,1); }
+.aviso[data-state="closed"] { animation: toast-sai .18s ease-in both; }
+@keyframes toast-entra { from { opacity: 0; translate: 24px 0; } }
+@keyframes toast-sai { to { opacity: 0; translate: 24px 0; } }
+/* Success check */
+.check { flex: none; color: var(--color-good); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.check circle { stroke-dasharray: 63; stroke-dashoffset: 63; animation: traco .35s ease-out .05s forwards; }
+.check path { stroke-dasharray: 20; stroke-dashoffset: 20; animation: traco .25s ease-out .25s forwards; }
+@keyframes traco { to { stroke-dashoffset: 0; } }
+/* Error state shake */
+.treme, .alerta { animation: treme .32s ease-in-out; }
+@keyframes treme { 20% { translate: -6px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 3px 0; } }
+/* Accordion */
+.acordeao-gatilho { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+.acordeao-gatilho svg { transition: rotate .25s; }
+.acordeao[data-aberto="false"] .acordeao-gatilho svg { rotate: -90deg; }
+.acordeao-corpo { display: grid; grid-template-rows: 1fr; margin-top: 12px; transition: grid-template-rows .3s cubic-bezier(.3,.8,.3,1), opacity .25s; }
+.acordeao-corpo > div { min-height: 0; overflow: hidden; }
+.acordeao[data-aberto="false"] .acordeao-corpo { grid-template-rows: 0fr; opacity: 0; margin-top: 0; }
+/* Confetti burst */
+.confete { position: absolute; left: 24px; top: 8px; width: 0; height: 0; pointer-events: none; }
+.confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; animation: confete .6s cubic-bezier(.1,.7,.3,1) forwards; }
+@keyframes confete { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }

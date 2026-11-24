@@ -2,7 +2,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import * as Toast from '@radix-ui/react-toast'
 import { motion, useReducedMotion } from 'motion/react'
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
-import { X } from 'lucide-react'
+import { CircleAlert, X } from 'lucide-react'
 import { Esqueleto, MatrizLoader } from './Efeitos'
 
 export const botao = 'inline-flex items-center justify-center gap-2 rounded-[10px] border border-line px-3 py-2 text-sm font-medium hover:bg-line disabled:opacity-50'
@@ -44,6 +44,8 @@ export function Avisos({ children }: { children: ReactNode }) {
       {avisos.map(aviso => <Toast.Root key={aviso.id} className={'aviso flex items-center gap-3 ' + painel}
         duration={aviso.tipo === 'erro' ? Infinity : 4000}
         onOpenChange={aberto => { if (!aberto) window.setTimeout(() => setAvisos(v => v.filter(a => a.id !== aviso.id)), 180) }}>
+        {aviso.tipo === 'sucesso' ? <svg className="check" viewBox="0 0 24 24" width="22" height="22" aria-hidden><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
+          : aviso.tipo === 'erro' ? <CircleAlert className="alerta text-bad" size={22} aria-hidden/> : null}
         <Toast.Description className={aviso.tipo === 'erro' ? 'text-bad' : 'text-slate-100'}>{aviso.texto}</Toast.Description>
         <Toast.Close aria-label="Fechar notificação" className="ml-auto p-1"><X size={16}/></Toast.Close>
       </Toast.Root>)}
