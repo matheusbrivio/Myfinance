@@ -24,6 +24,12 @@ export function FundoLiquido() {
     {fluido ? <LiquidEther lightMode colors={CORES} intensity={0.9} mouseForce={12} cursorSize={120} persistence={0.8}
       viscosity={0.3} resolution={0.3} autoDemo autoSpeed={0.2} autoIntensity={1.4} clickBurst={false}
       backgroundColor="#EEF1F5" maxDevicePixelRatio={1.5}/> : <div className="fundo-estatico"/>}
+    {/* Camada de profundidade: manchas, grade de pontos e granulado (desliza na transição intro → app). */}
+    <div className="fundo-camada">
+      <span className="fundo-mancha fundo-mancha-a"/><span className="fundo-mancha fundo-mancha-b"/>
+      <span className="fundo-pontos"/>
+    </div>
     <div className="fundo-veu"/>
+    <span className="fundo-grao"/>
   </div>
 }

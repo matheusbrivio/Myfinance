@@ -275,8 +275,15 @@ select.campo option { background: #fff; color: var(--text); }
 .intro-lanyard { position: absolute !important; inset: 0; }
 .intro-texto { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 16px 40px; text-align: center; }
 .intro-rotulo { font-size: 13px; font-weight: 500; color: var(--text-soft); }
-.intro-titulo { font-size: clamp(44px, 6vw, 72px); font-weight: 600; line-height: 1; letter-spacing: -.045em; }
-.intro-subtitulo { font-size: 16px; color: var(--text-soft); }
+/* Logo à esquerda e rótulo à direita, nos cantos de cima (as fitas não passam ali). */
+.intro-topo { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 24px clamp(16px, 4vw, 40px); pointer-events: none; }
+.intro-topo .marca span:last-child { font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+.intro-marca-dagua { position: absolute; left: 50%; top: 55%; z-index: 0; transform: translate(-50%, -50%); font-size: 17vw; font-weight: 600;
+  letter-spacing: -.06em; line-height: 1; white-space: nowrap; color: rgba(15, 23, 42, .05); pointer-events: none; user-select: none; }
+.intro-crachas { z-index: 1; }
+.intro-leque { z-index: 1; padding-top: 72px; }
+@media (max-width: 767px) { .intro-topo .intro-rotulo { font-size: 12px; text-align: right; } }
 .intro-play { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-soft); }
 .botao-play { position: relative; z-index: 1; display: grid; place-items: center; width: 88px; height: 88px; border-radius: 50%;
   background: var(--ink); color: #fff; padding-left: 5px; box-shadow: 0 14px 30px -14px rgba(15, 23, 42, .6); }
@@ -292,3 +299,13 @@ select.campo option { background: #fff; color: var(--text); }
 .intro-estatico-center { z-index: 1; }
 .intro-fita { width: 14px; flex: 0 0 22%; background: #0F172A; border-radius: 0 0 2px 2px; }
 .intro-estatico img { width: 100%; height: auto; border-radius: 14px; box-shadow: 0 18px 40px -18px rgba(15, 23, 42, .45); }
+
+/* Camada de profundidade do fundo: manchas, grade de pontos e granulado. */
+.fundo-camada { position: absolute; inset: 0; }
+.fundo-mancha { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; }
+.fundo-mancha-a { width: 42vw; height: 42vw; left: -10vw; top: -12vw; background: #BFDBFE; }
+.fundo-mancha-b { width: 38vw; height: 38vw; right: -8vw; bottom: -14vw; background: #FED7AA; }
+.fundo-pontos { position: absolute; inset: -40vh 0 0; background-image: radial-gradient(rgba(15, 23, 42, .09) 1px, transparent 1.2px); background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); }
+.fundo-grao { position: absolute; inset: 0; opacity: .06; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }

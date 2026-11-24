@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import { Play } from 'lucide-react'
+import { ChartNoAxesCombined, Play } from 'lucide-react'
 import { FundoLiquido } from '../components/FundoLiquido'
 import type { LanyardProps } from '../components/Lanyard'
 
@@ -73,6 +73,13 @@ export default function Intro() {
     <FundoLiquido/>
     <motion.div className="intro-conteudo" animate={saindo && !reduz ? { opacity: 0, y: -12, filter: 'blur(8px)' } : { opacity: saindo ? 0 : 1 }}
       transition={{ duration: reduz ? 0 : 0.35, ease: [0.4, 0, 1, 1] }}>
+      <h1 className="sr-only">MyFinance</h1>
+      {/* Marca d'água atrás dos crachás: dá profundidade e mostra o vidro. */}
+      <span className="intro-marca-dagua" aria-hidden>MyFinance</span>
+      <div className="intro-topo">
+        <span className="marca"><span className="marca-icone"><ChartNoAxesCombined size={18} aria-hidden/></span><span>MyFinance</span></span>
+        <p className="intro-rotulo">Engenharia de Software · AMF · 2026</p>
+      </div>
       <ul className="sr-only" aria-label="Integrantes">
         {integrantes.map(p => <li key={p.foto}>{p.nome}</li>)}
       </ul>
@@ -92,9 +99,6 @@ export default function Intro() {
         </div>)}
       </div>}
       <div className="intro-texto">
-        <p className="intro-rotulo">Projeto de Engenharia de Software · AMF · 2026</p>
-        <h1 className="intro-titulo">MyFinance</h1>
-        <p className="intro-subtitulo">Controle de finanças pessoais</p>
         <div className="intro-play">
           <span className="relative grid place-items-center">
             {/* Anel que pulsa suave a cada 2,4 s enquanto o botão está parado. */}
