@@ -7,8 +7,12 @@ import { Esqueleto, MatrizLoader } from './Efeitos'
 export const botao = 'inline-flex items-center justify-center gap-2 rounded-[10px] border border-line px-3 py-2 text-sm font-medium hover:bg-line disabled:opacity-50'
 export const primario = botao + ' bg-accent text-base border-accent hover:bg-sky-200'
 export const campo = 'w-full rounded-[10px] border border-line bg-base px-3 py-2 text-sm aria-invalid:border-bad'
-export const painel = 'min-w-0 rounded-xl border border-line bg-panel/95 p-5'
+export const painel = 'glass min-w-0 rounded-[26px] p-6'
 
+// Rótulo de seção (mono, caixa alta) + título do card em serifa.
+export function Secao({ n, rotulo, titulo }: { n: string; rotulo: string; titulo: string }) {
+  return <div className="mb-5"><p className="rotulo-secao">{n} — {rotulo}</p><h2 className="titulo-card">{titulo}</h2></div>
+}
 export function Painel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <section className={painel + ' ' + className}>{children}</section>
 }

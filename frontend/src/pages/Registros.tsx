@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Historico } from '../components/Historico'
+import { ListaTransacoes } from '../components/ListaTransacoes'
 import { Formulario, Calendario, type Campo } from '../components/Formulario'
 import { Abas } from '../components/Abas'
 import { Entrada } from '../components/Entrada'
@@ -71,7 +71,7 @@ export function Transacoes() {
       }}/></div>
     <Filtros key={chaveFiltros} params={params} opcoes={opcoes} setParams={setParams}/></Entrada>
     {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={5}/> :
-      <Painel><Historico itens={q.data.resultados} acoes={item => <Acoes editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>}/>
+      <Painel><ListaTransacoes itens={q.data.resultados} acoes={item => <Acoes editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>}/>
         <Paginacao pagina={q.data.pagina} total={q.data.total} mudar={pagina => {
           const novos = new URLSearchParams(params)
           novos.set('pagina', String(pagina)); setParams(novos)

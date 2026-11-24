@@ -15,6 +15,7 @@
   --color-line: rgba(255, 255, 255, .07);
   --color-muted: #9FB0C1;
   --color-soft: #CBD5DF;
+  --color-text: #EEF2F6;
   --color-pill: #F4F6F8;
   --color-accent: #F0B27A;
   --color-good: #7EE2B8;
@@ -87,7 +88,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 
 /* Números: mono + tabular-nums em todo valor monetário */
 .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.hero { padding: 28px 24px; }
 
 /* Spinning counter */
 .dig { display: inline-block; height: 1em; line-height: 1em; overflow: hidden; vertical-align: bottom; }
@@ -156,3 +156,46 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   radial-gradient(55% 45% at 50% 100%, #C47A46 0%, transparent 70%); opacity: .9; }
 .fundo-veu { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,7,12,.15), rgba(5,7,12,.5)); }
 .app { position: relative; z-index: 1; }
+
+/* Rótulos e títulos */
+.rotulo-secao { font-family: var(--font-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted); }
+.titulo-card { font-family: var(--font-display); font-weight: 400; font-size: 32px; line-height: 1.1; margin-top: 6px; }
+.ponto { display: inline-block; flex: none; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; box-shadow: 0 0 10px 1px currentColor; }
+
+/* Hero do dashboard (sem card; o véu do fundo garante a leitura) */
+.hero { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 24px 0 8px; }
+.rotulo-hero { font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-soft); font-weight: 400; }
+.saldo { display: inline-block; font-size: clamp(64px, 9vw, 136px); line-height: .95; letter-spacing: -.02em; }
+.saldo .centavos { color: color-mix(in srgb, currentColor 45%, transparent); }
+.frase-hero { margin-top: 14px; font-size: 17px; color: var(--text-soft); }
+.frase-hero em { font-family: var(--font-display); font-size: 1.5em; color: var(--accent); }
+.patrimonio { border-radius: 24px; padding: 20px 24px; min-width: 260px; }
+.vazio-dashboard { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; }
+.vazio-dashboard > img { filter: drop-shadow(0 0 18px rgba(95, 180, 224, .5)); }
+
+/* Barras */
+.trilho { height: 10px; border-radius: 999px; background: rgba(255, 255, 255, .06); overflow: hidden; }
+.trilho-fino { height: 4px; margin-top: 10px; overflow: visible; }
+.barra-categoria { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #C9624F, #FF9E8A); }
+.barra-ambar { height: 100%; border-radius: inherit; background: var(--accent); box-shadow: 0 0 12px rgba(240, 178, 122, .6); }
+
+/* Legenda da rosca */
+.legenda-item { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.legenda-item:last-child { border-bottom: 0; }
+
+/* Lista de transações */
+.lista-tr { display: grid; }
+.linha-tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 12px 10px; margin: 0 -10px;
+  border-radius: 16px; transition: background-color .16s; }
+.linha-tr + .linha-tr { border-top: 1px solid var(--line); }
+.linha-tr:hover { background: rgba(255, 255, 255, .035); }
+.linha-tr:has(.acoes-tr) { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+.icone-tr { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .08); }
+.descricao-tr { display: block; font-weight: 500; }
+.meta-tr { display: block; margin-top: 2px; font-size: 13px; color: var(--text-muted); }
+.valor-tr { white-space: nowrap; text-align: right; }
+.acoes-tr { display: flex; gap: 4px; }
+@media (max-width: 520px) {
+  .linha-tr, .linha-tr:has(.acoes-tr) { grid-template-columns: auto minmax(0, 1fr); }
+  .valor-tr, .acoes-tr { grid-column: 2; text-align: left; }
+}
