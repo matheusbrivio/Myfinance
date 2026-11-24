@@ -9,7 +9,7 @@ export default defineConfig({
   build: {
     assetsDir: 'react-assets',
     rollupOptions: { output: { manualChunks: {
-      charts: ['recharts'], react: ['react', 'react-dom', 'react-router'],
+      charts: ['recharts'], react: ['react', 'react-dom', 'react-router'], three: ['three'],
     } } },
   },
   test: { setupFiles: ['./src/test-setup.ts'] },

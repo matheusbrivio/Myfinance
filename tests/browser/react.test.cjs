@@ -46,8 +46,19 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
     const falhas = []
     pagina.on('pageerror', erro => falhas.push(erro.message))
     await pagina.goto(origem)
-    await pagina.getByRole('heading', {name:'Dashboard'}).waitFor()
+    // Intro: abre em /app/, mostra título, botão de entrar e os 3 integrantes na lista acessível.
+    await pagina.getByRole('heading', {name:'MyFinance'}).waitFor()
     assert.equal(new URL(pagina.url()).pathname, '/app/')
+    const entrar = pagina.getByRole('button', {name:'Entrar no MyFinance'})
+    assert.ok(await entrar.isVisible())
+    assert.deepEqual(await pagina.getByRole('list', {name:'Integrantes'}).getByRole('listitem').allTextContents(),
+      ['Matheus Brivio', 'Eduardo Rafael da Silva Suarez', 'Murillo Muller'])
+    // Com reduced-motion a intro usa as imagens estáticas: as três precisam carregar.
+    await pagina.waitForFunction(() => [...document.querySelectorAll('.intro img')].length === 3 &&
+      [...document.querySelectorAll('.intro img')].every(img => img.complete && img.naturalWidth > 0))
+    await entrar.click()
+    await pagina.getByRole('heading', {name:'Dashboard'}).waitFor()
+    assert.equal(new URL(pagina.url()).pathname, '/app/dashboard')
     await pagina.getByText('Nenhuma receita registrada para distribuir.').waitFor()
     await pagina.evaluate(() => { window.myfinanceNavegacao = 'spa' })
     const nav = pagina.getByRole('navigation', {name:'Principal'})

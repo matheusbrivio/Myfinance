@@ -13,7 +13,7 @@ import { EdicaoRegistro } from '../pages/Registros'
 import { AtualizacaoContext } from './contexto'
 
 const paginas = [
-  { caminho: '/', titulo: 'Dashboard', icone: LayoutDashboard },
+  { caminho: '/dashboard', titulo: 'Dashboard', icone: LayoutDashboard },
   { caminho: '/transacoes', titulo: 'Transações', icone: List },
   { caminho: '/categorias', titulo: 'Categorias', icone: Tags },
   { caminho: '/metas', titulo: 'Metas', icone: Goal },
@@ -33,11 +33,11 @@ export function Layout() {
         {/* Uma única barra de vidro, fixa no topo. No celular o menu vai para uma barra no rodapé. */}
         <div className="container-app barra-fixa">
           <header className="barra">
-            <NavLink to="/" className="marca" aria-label="MyFinance, ir para o Dashboard">
+            <NavLink to="/dashboard" className="marca" aria-label="MyFinance, ir para o Dashboard">
               <span className="marca-icone"><ChartNoAxesCombined size={18} aria-hidden/></span><span>MyFinance</span>
             </NavLink>
             <nav aria-label="Principal" className="menu">
-              {paginas.map(({ caminho, titulo, icone: Icone }) => <NavLink end={caminho === '/'} key={caminho} to={caminho} className="menu-item">
+              {paginas.map(({ caminho, titulo, icone: Icone }) => <NavLink end={caminho === '/dashboard'} key={caminho} to={caminho} className="menu-item">
                 {({ isActive }) => <>{isActive && <PilulaAtiva id="menu-pilula"/>}
                   <span className="pilula-texto menu-rotulo"><Icone className="menu-icone" size={18} aria-hidden/>{titulo}</span></>}
               </NavLink>)}
