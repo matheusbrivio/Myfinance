@@ -396,8 +396,11 @@ const SpecularButton = ({
       view.width = Math.max(1, box ? box.inlineSize : button.offsetWidth);
       view.height = Math.max(1, box ? box.blockSize : button.offsetHeight);
       view.ratio = Math.min(window.devicePixelRatio || 1, 3);
-      canvas.width = Math.max(1, Math.round((view.width + PAD * 2) * view.ratio));
-      canvas.height = Math.max(1, Math.round((view.height + PAD * 2) * view.ratio));
+      // Só redimensiona se mudou: atribuir width/height realoca o buffer do canvas mesmo com o mesmo valor.
+      const width = Math.max(1, Math.round((view.width + PAD * 2) * view.ratio));
+      const height = Math.max(1, Math.round((view.height + PAD * 2) * view.ratio));
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
       if (state.ready) draw(settingsRef.current);
       wake();
     };

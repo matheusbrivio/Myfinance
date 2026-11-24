@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import * as THREE from 'three';
 
 import './Lanyard.css';
@@ -49,9 +49,11 @@ export interface LanyardProps {
   onHoverChange?: (hovering: boolean, grabbing: boolean) => void;
   /** Recebe o pointerdown antes dos outros Lanyards empilhados (ganha quando os cartões se sobrepõem). */
   priority?: boolean;
+  /** Atraso (ms) da entrada depois que o palco inteiro está pronto: escalona os crachás sem escalonar o carregamento. */
+  delay?: number;
 }
 type ClaimablePointerEvent = PointerEvent & { lanyardClaimed?: boolean };
-type Settings = Required<Omit<LanyardProps, 'frontImage' | 'backImage' | 'strapImage' | 'className' | 'style' | 'onHoverChange' | 'priority'>> &
+type Settings = Required<Omit<LanyardProps, 'frontImage' | 'backImage' | 'strapImage' | 'className' | 'style' | 'onHoverChange' | 'priority' | 'delay'>> &
   Pick<LanyardProps, 'frontImage' | 'backImage' | 'strapImage'>;
 
 const CARD_SIZES: Record<Orientation, [number, number]> = {
@@ -255,9 +257,13 @@ const loadImage = (cache: Map<string, Promise<HTMLImageElement | null>>, url: st
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.decoding = 'async';
-    image.onload = () => resolve(image);
     image.onerror = () => resolve(null);
     image.src = url;
+    // decode() decodifica fora da thread principal; sem ele, o drawImage decodificaria no meio da animação.
+    image.decode().then(
+      () => resolve(image),
+      () => resolve(image.complete && image.naturalWidth ? image : null)
+    );
   });
   cache.set(url, promise);
   return promise;
@@ -750,6 +756,172 @@ const stepSimulation = (sim: Simulation, dt: number, physics: Physics, time: num
   sim.calm = energy < 2e-4 ? sim.calm + dt : 0;
 };
 
+// Palco: um renderizador e um canvas para todos os crachás. Antes, cada Lanyard tinha o seu
+// (mais um contexto WebGL, mais um canvas transparente em tela cheia para compor e mais uma
+// compilação de shaders), e três deles juntos travavam a intro.
+const MAX_PIXEL_RATIO = 1.5;
+const scratchSize = new THREE.Vector2();
+
+type Actor = {
+  /** Avança a física; devolve true enquanto o crachá ainda se mexe. */
+  step: (dt: number) => boolean;
+  draw: () => void;
+  resize: () => void;
+  /** Desenha uma vez mesmo antes de entrar: paga a compilação do driver e o envio de texturas fora da animação. */
+  warm: () => void;
+  /** Começa a entrada (o palco chama quando todos os crachás estão prontos). */
+  go: () => void;
+};
+type Stage = {
+  renderer: THREE.WebGLRenderer;
+  canvas: HTMLCanvasElement;
+  environment: THREE.Texture;
+  view: { width: number; height: number };
+  /** Adiciona um crachá (desenhado por cima dos anteriores); devolve a remoção. */
+  add: (actor: Actor) => () => void;
+  /** O crachá terminou de carregar (imagens, texturas e shaders). */
+  prepared: (actor: Actor) => void;
+  /** Garante que o laço de animação está rodando. */
+  wake: () => void;
+  /** O dono larga o palco; ele é descartado quando o último crachá sair. */
+  release: () => void;
+};
+type StageSlot = { stage: Stage | null; waiting: Set<(stage: Stage) => void> };
+const StageContext = createContext<StageSlot | null>(null);
+
+const createStage = (container: HTMLElement): Stage | null => {
+  let renderer: THREE.WebGLRenderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  } catch {
+    return null;
+  }
+  renderer.autoClear = false;
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 1;
+  const canvas = renderer.domElement;
+  canvas.className = 'lanyard-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  container.appendChild(canvas);
+  const environment = buildEnvironment(renderer);
+
+  const actors: Actor[] = [];
+  const ready = new Set<Actor>();
+  let launched = false;
+  const view = { width: 1, height: 1 };
+  let raf = 0;
+  let last = 0;
+  let visible = true;
+  let released = false;
+  let disposed = false;
+
+  const redraw = () => {
+    if (disposed) return;
+    renderer.clear();
+    // Cada crachá por cima do anterior, como os canvases empilhados de antes.
+    for (const actor of actors) {
+      renderer.clearDepth();
+      actor.draw();
+    }
+  };
+  const frame = (now: number) => {
+    raf = 0;
+    if (disposed) return;
+    const dt = Math.min(1 / 30, Math.max(1 / 240, (now - last) / 1000));
+    last = now;
+    let moving = false;
+    for (const actor of actors) if (actor.step(dt)) moving = true;
+    redraw();
+    if (moving && visible) raf = requestAnimationFrame(frame);
+  };
+  const wake = () => {
+    if (raf || disposed || !visible) return;
+    last = performance.now();
+    raf = requestAnimationFrame(frame);
+  };
+  const resize = () => {
+    view.width = Math.max(1, container.clientWidth);
+    view.height = Math.max(1, container.clientHeight);
+    // setSize realoca o buffer (com MSAA, em tela cheia): só quando o tamanho mudou de fato.
+    const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
+    const current = renderer.getSize(scratchSize);
+    if (renderer.getPixelRatio() !== ratio || current.x !== view.width || current.y !== view.height) {
+      renderer.setPixelRatio(ratio);
+      renderer.setSize(view.width, view.height, false);
+    }
+    actors.forEach(actor => actor.resize());
+    redraw();
+  };
+
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
+  const intersectionObserver = new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    if (visible) wake();
+  });
+  intersectionObserver.observe(container);
+  const onVisibility = () => {
+    if (!document.hidden) wake();
+  };
+  document.addEventListener('visibilitychange', onVisibility);
+  resize();
+
+  // Ninguém se mexe até todos estarem carregados: assim a carga pesada (decodificar imagens,
+  // enviar texturas, compilar shaders) nunca cai no meio da animação de entrada.
+  const launch = () => {
+    if (launched || disposed || actors.some(actor => !ready.has(actor))) return;
+    launched = true;
+    actors.forEach(actor => actor.warm());
+    // O aquecimento não aparece: a tela só é composta no fim da tarefa, depois deste clear.
+    renderer.clear();
+    actors.forEach(actor => actor.go());
+  };
+
+  const dispose = () => {
+    disposed = true;
+    cancelAnimationFrame(raf);
+    resizeObserver.disconnect();
+    intersectionObserver.disconnect();
+    document.removeEventListener('visibilitychange', onVisibility);
+    environment.dispose();
+    renderer.dispose();
+    if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+  };
+
+  return {
+    renderer,
+    canvas,
+    environment: environment.texture,
+    view,
+    wake,
+    add(actor) {
+      actors.push(actor);
+      actor.resize();
+      return () => {
+        const index = actors.indexOf(actor);
+        if (index >= 0) actors.splice(index, 1);
+        ready.delete(actor);
+        if (actors.length) launch();
+        if (released && actors.length === 0) dispose();
+        else redraw();
+      };
+    },
+    prepared(actor) {
+      if (!actors.includes(actor)) return;
+      ready.add(actor);
+      // Quem chega depois da largada entra direto.
+      if (launched) actor.go();
+      else launch();
+    },
+    release() {
+      released = true;
+      if (actors.length === 0) dispose();
+    }
+  };
+};
+
 const Lanyard = ({
   frontImage,
   backImage,
@@ -774,7 +946,8 @@ const Lanyard = ({
   className = '',
   style,
   onHoverChange,
-  priority = false
+  priority = false,
+  delay = 0
 }: LanyardProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<Settings>(null!);
@@ -809,29 +982,39 @@ const Lanyard = ({
     applyRef.current?.();
   });
 
+  const slot = useContext(StageContext);
+
   useEffect(() => {
+    // Dentro de um <LanyardStage>, o crachá entra no palco compartilhado; fora dele, cria o próprio.
+    let detach: (() => void) | undefined;
+    const enter = (stage: Stage) => {
+      detach = attach(stage);
+    };
+    if (slot) {
+      if (slot.stage) enter(slot.stage);
+      else slot.waiting.add(enter);
+      return () => {
+        slot.waiting.delete(enter);
+        detach?.();
+      };
+    }
     const container = containerRef.current;
     if (!container) return undefined;
+    const stage = createStage(container);
+    if (!stage) return undefined;
+    enter(stage);
+    return () => {
+      detach?.();
+      stage.release();
+    };
+  }, [slot]);
 
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    } catch {
-      return undefined;
-    }
-    renderer.setClearColor(0x000000, 0);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.NeutralToneMapping;
-    renderer.toneMappingExposure = 1;
-    const canvas = renderer.domElement;
-    canvas.className = 'lanyard-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    container.appendChild(canvas);
-
+  // Monta um crachá (cena, física e ponteiro) num palco; devolve a limpeza.
+  const attach = (stage: Stage) => {
+    const { renderer, canvas, view } = stage;
     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const scene = new THREE.Scene();
-    const environment = buildEnvironment(renderer);
-    scene.environment = environment.texture;
+    scene.environment = stage.environment;
     const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
     keyLight.position.set(-2.5, 4, 6);
@@ -919,16 +1102,19 @@ const Lanyard = ({
     const mouth = new THREE.Vector3();
     const tuck = new THREE.Vector3();
     const curve = new THREE.CatmullRomCurve3(controls, false, 'centripetal');
-    const view = { width: 1, height: 1 };
     let layout = cardLayout('portrait', 0.3);
     let applied: { layoutKey?: string; framingKey?: string; imageKey?: string; faceKey?: string; strapColor?: string; strapScale?: number } = {};
     let strapScale = STRAP_WIDTH;
     let tileRatio = 2;
-    let raf = 0;
-    let last = performance.now();
     let time = 0;
-    let visible = true;
     let alive = true;
+    // active: a física deste crachá está rodando; ready: já entrou em cena (é desenhado).
+    let active = false;
+    let ready = false;
+    // compiled/painted: shaders compilados e imagens pintadas e enviadas à GPU.
+    let compiled = false;
+    let painted = false;
+    let entrance = 0;
     let placed = false;
     let hovering = false;
     let press: { x: number; y: number; time: number; point: THREE.Vector3 } | null = null;
@@ -1032,6 +1218,12 @@ const Lanyard = ({
           images.strap = strap;
           paintFaces();
           repaintStrap();
+          // Envia as texturas à GPU agora, e não no primeiro quadro em que o crachá aparece.
+          [frontTexture, backTexture, strapTexture].forEach(texture => renderer.initTexture(texture));
+          if (!painted) {
+            painted = true;
+            prepare();
+          }
         });
       }
       const faceKey = `${layoutKey}|${s.cardColor}|${s.imageFit}`;
@@ -1147,7 +1339,8 @@ const Lanyard = ({
       clampGroup.position.copy(hang);
     };
 
-    const render = () => {
+    const draw = () => {
+      if (!ready) return;
       cardGroup.position.copy(sim.body.position);
       cardGroup.quaternion.copy(sim.body.quaternion);
       updateBand();
@@ -1181,11 +1374,9 @@ const Lanyard = ({
       };
     };
 
-    const tick = (now: number) => {
-      raf = 0;
-      if (!alive) return;
-      const dt = Math.min(1 / 30, Math.max(1 / 240, (now - last) / 1000));
-      last = now;
+    // O palco chama step em todos os crachás e depois desenha todos, num único quadro.
+    const step = (dt: number) => {
+      if (!alive || !ready || !active) return false;
       time += dt;
       const current = physics();
       stepSimulation(sim, dt, current, time);
@@ -1194,16 +1385,17 @@ const Lanyard = ({
         sim.grab = null;
         placeHanging(sim, layout, false);
       }
-      render();
-      const resting = sim.calm > 1.2 && !sim.grab && current.breeze === 0;
-      if (visible && !resting) raf = requestAnimationFrame(tick);
+      if (sim.calm > 1.2 && !sim.grab && current.breeze === 0) active = false;
+      return active;
     };
 
     const start = () => {
-      if (raf || !visible || !alive) return;
-      sim.calm = 0;
-      last = performance.now();
-      raf = requestAnimationFrame(tick);
+      if (!alive) return;
+      if (!active) {
+        active = true;
+        sim.calm = 0;
+      }
+      stage.wake();
     };
 
     const raycaster = new THREE.Raycaster();
@@ -1306,37 +1498,41 @@ const Lanyard = ({
     document.body.addEventListener('lostpointercapture', onPointerUp);
     window.addEventListener('touchstart', onTouchStart, { passive: false });
 
-    const resize = () => {
-      view.width = Math.max(1, container.clientWidth);
-      view.height = Math.max(1, container.clientHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(view.width, view.height, false);
-      apply();
-      render();
+    const warm = () => {
+      const was = ready;
+      ready = true;
+      draw();
+      ready = was;
     };
-
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(container);
-    const intersectionObserver = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      if (visible) start();
-    });
-    intersectionObserver.observe(container);
-    const onVisibility = () => {
-      if (!document.hidden) start();
+    const go = () => {
+      window.clearTimeout(entrance);
+      entrance = window.setTimeout(() => {
+        if (!alive) return;
+        ready = true;
+        start();
+      }, delay);
     };
-    document.addEventListener('visibilitychange', onVisibility);
+    const actor: Actor = { step, draw, resize: apply, warm, go };
+    const prepare = () => {
+      if (alive && compiled && painted) stage.prepared(actor);
+    };
 
     applyRef.current = apply;
-    resize();
+    const leave = stage.add(actor);
+    // Compila os shaders antes do primeiro quadro (em paralelo, quando o navegador permite):
+    // compilar no meio da animação de entrada travava a tela. Os crachás seguintes reaproveitam.
+    renderer
+      .compileAsync(scene, camera)
+      .catch(() => undefined)
+      .then(() => {
+        compiled = true;
+        prepare();
+      });
 
     return () => {
       alive = false;
-      cancelAnimationFrame(raf);
+      window.clearTimeout(entrance);
       applyRef.current = null;
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pointerdown', onPointerDown, { capture: priority });
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
@@ -1347,13 +1543,38 @@ const Lanyard = ({
       [bodyMesh, frontMesh, backMesh, ring, clampMesh, eyelet, band].forEach(mesh => mesh.geometry?.dispose());
       [frontMaterial, backMaterial, edgeMaterial, metalMaterial, bandMaterial].forEach(material => material.dispose());
       [frontTexture, backTexture, strapTexture, grain, weave].forEach(texture => texture.dispose());
-      environment.dispose();
-      renderer.dispose();
-      if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      leave();
     };
-  }, []);
+  };
 
+  // No palco compartilhado, o canvas é do palco: este crachá não precisa de elemento próprio.
+  if (slot) return null;
   return <div ref={containerRef} className={`lanyard ${className}`.trim()} style={style} />;
+};
+
+/** Palco para vários Lanyards: um renderizador, um canvas e um laço de animação para todos. */
+export const LanyardStage = ({ className = '', style, children }: { className?: string; style?: CSSProperties; children?: ReactNode }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [slot] = useState<StageSlot>(() => ({ stage: null, waiting: new Set() }));
+
+  // Os efeitos dos filhos rodam antes deste: quem chegou antes do palco fica em slot.waiting.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+    const stage = createStage(container);
+    if (!stage) return undefined;
+    slot.stage = stage;
+    slot.waiting.forEach(enter => enter(stage));
+    slot.waiting.clear();
+    return () => {
+      slot.stage = null;
+      stage.release();
+    };
+  }, [slot]);
+
+  return <div ref={containerRef} className={`lanyard ${className}`.trim()} style={style} aria-hidden>
+    <StageContext.Provider value={slot}>{children}</StageContext.Provider>
+  </div>;
 };
 
 export default Lanyard;

@@ -4,12 +4,14 @@ import { motion, useReducedMotion } from 'motion/react'
 import { ChartNoAxesCombined } from 'lucide-react'
 import { BotaoEntrar } from '../components/BotaoEntrar'
 import type { LanyardProps } from '../components/Lanyard'
+import { suporteWebGL } from '../services/webgl'
 
 // O Django só serve arquivos estáticos em /react-assets/: as imagens ficam em public/react-assets/intro.
 const IMG = '/react-assets/intro/'
 
 // O three só é baixado quando os crachás 3D vão de fato aparecer (não no fallback).
 const Lanyard = lazy(() => import('../components/Lanyard'))
+const LanyardStage = lazy(() => import('../components/Lanyard').then(m => ({ default: m.LanyardStage })))
 
 const integrantes = [
   { nome: 'Matheus Brivio', foto: 'matheus', anchor: 'left' },
@@ -23,13 +25,6 @@ const comum = {
 } satisfies LanyardProps
 const atrasos = [0, 180, 360]
 
-function temWebGL() {
-  if (typeof WebGLRenderingContext === 'undefined') return false
-  try {
-    const canvas = document.createElement('canvas')
-    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'))
-  } catch { return false }
-}
 function useCelular() {
   const consulta = '(max-width: 767px)'
   const [celular, setCelular] = useState(() => window.matchMedia?.(consulta).matches ?? false)
@@ -47,20 +42,12 @@ export default function Intro() {
   const reduz = useReducedMotion()
   const navigate = useNavigate()
   const celular = useCelular()
-  const [webgl] = useState(temWebGL)
-  const [montados, setMontados] = useState(0)
+  const [webgl] = useState(() => suporteWebGL().webgl)
   const [saindo, setSaindo] = useState(false)
   // Cursor dos crachás: o canvas não recebe ponteiro, então cada Lanyard avisa por onHoverChange.
   const [cursores, setCursores] = useState<('grab' | 'grabbing' | '')[]>(['', '', ''])
   // Celular (< 768px), reduced-motion ou sem WebGL: fallback estático em leque.
   const tresD = webgl && !reduz && !celular
-
-  // Os crachás entram em sequência: esquerda, centro (180 ms) e direita (360 ms).
-  useEffect(() => {
-    if (!tresD) return
-    const timers = atrasos.map((ms, i) => window.setTimeout(() => setMontados(n => Math.max(n, i + 1)), ms))
-    return () => timers.forEach(t => window.clearTimeout(t))
-  }, [tresD])
 
   // A descida para o site é feita pelas Cenas (AnimatePresence na raiz das rotas).
   function entrar() {
@@ -82,15 +69,15 @@ export default function Intro() {
       <ul className="sr-only" aria-label="Integrantes">
         {integrantes.map(p => <li key={p.foto}>{p.nome}</li>)}
       </ul>
-      {/* Os três Lanyards cobrem a tela inteira, empilhados, cada um com sua âncora: nada corta na borda. */}
-      {tresD ? <div className="intro-crachas" aria-hidden>
-        {integrantes.map((p, i) => i < montados && <Suspense key={p.foto} fallback={null}>
-          <Lanyard {...comum} className="intro-lanyard" anchor={p.anchor} priority={p.anchor === 'center'}
+      {/* Os três crachás dividem um palco em tela cheia (um canvas e um contexto WebGL), cada um com sua âncora. */}
+      {tresD ? <Suspense fallback={null}><LanyardStage className="intro-crachas">
+        {/* Os três montam juntos e carregam em paralelo; a entrada é escalonada (0, 180 e 360 ms) só depois que todos estão prontos. */}
+        {integrantes.map((p, i) =>
+          <Lanyard key={p.foto} {...comum} anchor={p.anchor} priority={p.anchor === 'center'} delay={atrasos[i]}
             frontImage={`${IMG}cracha-${p.foto}-frente.png`} backImage={`${IMG}cracha-${p.foto}-verso.png`}
             size={p.anchor === 'center' ? 0.56 : 0.5} strapLength={p.anchor === 'center' ? 0.36 : 0.3}
-            onHoverChange={(hover, arrastando) => setCursores(c => c.map((v, j) => j === i ? (arrastando ? 'grabbing' : hover ? 'grab' : '') : v))}/>
-        </Suspense>)}
-      </div> : <div className="intro-leque" aria-hidden>
+            onHoverChange={(hover, arrastando) => setCursores(c => c.map((v, j) => j === i ? (arrastando ? 'grabbing' : hover ? 'grab' : '') : v))}/>)}
+      </LanyardStage></Suspense> : <div className="intro-leque" aria-hidden>
         {integrantes.map((p, i) => <div key={p.foto} className={'intro-estatico intro-estatico-' + p.anchor}
           style={{ '--giro': [-8, 0, 8][i] + 'deg' } as CSSProperties}>
           <span className="intro-fita"/>
