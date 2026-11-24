@@ -89,7 +89,7 @@ export function Transacoes() {
   return <>
     <Cabecalho titulo="Transações" subtitulo="Tudo o que entrou e saiu, com filtros por tipo, categoria e período."/>
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
-    <Entrada><Filtros params={params} opcoes={opcoes} aplicar={aplicar} limpar={() => setParams(new URLSearchParams())}/></Entrada>
+    <Entrada className="relative z-10"><Filtros params={params} opcoes={opcoes} aplicar={aplicar} limpar={() => setParams(new URLSearchParams())}/></Entrada>
     <Entrada delay={0.05}><p className="resumo-linha">
       <span><strong className="forte">{lista?.total ?? '—'}</strong> {lista?.total === 1 ? 'transação' : 'transações'}</span>
       <span aria-hidden>·</span>

@@ -251,3 +251,18 @@ select.campo option { background: #fff; color: var(--text); }
 .confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; }
 .vazio-icone { display: grid; flex: none; place-items: center; width: 72px; height: 72px; border-radius: 20px; background: var(--ink); color: #fff; }
 .segmento-radio { position: absolute; inset: 0; z-index: 2; margin: 0; opacity: 0; cursor: pointer; appearance: none; }
+
+/* Seletor de datas: popover de vidro por cima do conteúdo, sem empurrar o layout. */
+.calendario { position: absolute; top: calc(100% + 6px); z-index: 40; width: min(300px, calc(100vw - 32px)); padding: 12px; border-radius: 20px;
+  /* Mais opaco que o .glass: dentro do modal (também de vidro) o desfoque aninhado não funciona e o texto de baixo apareceria. */
+  background: rgba(255, 255, 255, .94); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 12px 32px -12px rgba(15, 23, 42, .28); }
+.dia-semana { padding: 4px 0; font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.dia { position: relative; display: grid; place-items: center; height: 36px; border-radius: 999px; color: var(--text); transition: background-color .15s, color .15s; }
+.dia:hover { background: var(--track); }
+.dia-selecionado { color: #fff; }
+.dia-selecionado:hover { background: transparent; }
+.dia-pilula { position: absolute; inset: 1px 3px; border-radius: 999px; background: var(--ink); }
+.dia-hoje { position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--available); z-index: 1; }
+.dia-selecionado .dia-hoje { background: #fff; }
+/* O modal não corta o popover do calendário; só rola quando a tela é baixa demais para ele. */
+@media (max-height: 720px) { .dialogo { max-height: 92vh; overflow-y: auto; } }

@@ -47,8 +47,9 @@ export function Dialogo({ titulo, aberto, onOpenChange, children }: {
         <motion.div className="fixed inset-0 z-40 bg-[rgba(15,23,42,.25)] backdrop-blur-[4px]"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduz ? 0 : 0.25 }}/>
       </DialogPrimitive.Overlay>
-      <DialogPrimitive.Content asChild forceMount>
-        <motion.div className="dialogo glass glass-modal fixed inset-0 z-50 m-auto h-fit max-h-[90vh] w-[min(460px,calc(100%-2rem))] overflow-y-auto rounded-[24px] p-6"
+      {/* Escape com um calendário aberto fecha só o calendário, não o modal. */}
+      <DialogPrimitive.Content asChild forceMount onEscapeKeyDown={e => { if (document.querySelector('[data-calendario-aberto]')) e.preventDefault() }}>
+        <motion.div className="dialogo glass glass-modal fixed inset-0 z-50 m-auto h-fit w-[min(460px,calc(100%-2rem))] rounded-[24px] p-6"
           initial={reduz ? { opacity: 0 } : { opacity: 0, scale: 0.97, filter: 'blur(6px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: reduz ? 0 : 0.35, ease: suave }, transitionEnd: { filter: 'none' } }}
           exit={reduz ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.18, ease: 'easeIn' } }}>

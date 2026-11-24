@@ -1,5 +1,5 @@
-import { useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
-import { motion, useAnimationControls, useReducedMotion } from 'motion/react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
+import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from 'motion/react'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ErroAPI, api } from '../services/api'
 import { dataBR, dataISO, moeda, tipos, valorAPI } from '../services/format'
@@ -19,45 +19,135 @@ export type Campo = {
 const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 const tremor = { x: [0, -6, 6, -4, 3, 0], transition: { duration: 0.3 } }
 
+const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+const doisDigitos = (n: number) => String(n).padStart(2, '0')
+const formatar = (d: Date) => [d.getDate(), d.getMonth() + 1, d.getFullYear()].map(doisDigitos).join('/')
+// Mês exibido ao abrir: o da data digitada, se válida; senão, o mês atual.
+function mesDe(valor: string) {
+  const [, m, a] = valor.split('/').map(Number)
+  const hoje = new Date()
+  return m >= 1 && m <= 12 && a >= 1000 ? new Date(a, m - 1, 1) : new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+}
+const suaveCal = [0.16, 1, 0.3, 1] as const
+const molaDia = { type: 'spring', stiffness: 500, damping: 35 } as const
+
+/**
+ * Seletor de datas: popover de vidro ancorado embaixo do campo, por cima do conteúdo.
+ * Abre com fade + scale; os dias entram em cascata; trocar de mês desliza a grade na direção
+ * da seta; a pílula do dia selecionado desliza entre os dias (layoutId).
+ * Escape fecha e devolve o foco ao botão; clicar fora também fecha.
+ */
 export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao, compacto = false }: {
   id: string; valor: string; mudar: (v: string) => void; invalido?: boolean; obrigatorio?: boolean; descricao?: string
   /** Versão de 40px, para a barra de filtros. */
   compacto?: boolean
 }) {
+  const reduz = useReducedMotion()
+  const idPilula = useId()
   const [aberto, setAberto] = useState(false)
-  const [mes, setMes] = useState(() => {
-    const [, mesInicial, anoInicial] = valor.split('/').map(Number)
-    const hoje = new Date()
-    return mesInicial >= 1 && mesInicial <= 12 && anoInicial >= 1000
-      ? new Date(anoInicial, mesInicial - 1, 1) : new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-  })
+  const [mes, setMes] = useState(() => mesDe(valor))
+  const [direcao, setDirecao] = useState(0)
+  // A cascata dos dias só acontece na abertura, não ao trocar de mês.
+  const [cascata, setCascata] = useState(true)
+  const [direita, setDireita] = useState(false)
+  const [pulso, setPulso] = useState<string>()
   const acionador = useRef<HTMLButtonElement>(null)
+  const raiz = useRef<HTMLDivElement>(null)
+  const fechamento = useRef<number | undefined>(undefined)
+
+  function abrir() {
+    const caixa = raiz.current?.getBoundingClientRect()
+    // Perto da borda direita, alinha o popover pela direita do campo para não sair da tela.
+    setDireita(!!caixa && caixa.left + 300 > window.innerWidth - 12)
+    setMes(mesDe(valor)); setDirecao(0); setCascata(true); setPulso(undefined); setAberto(true)
+  }
+  function fechar(devolverFoco: boolean) {
+    window.clearTimeout(fechamento.current)
+    setAberto(false)
+    if (devolverFoco) acionador.current?.focus()
+  }
+  function trocarMes(passo: number) {
+    setDirecao(passo); setCascata(false)
+    setMes(m => new Date(m.getFullYear(), m.getMonth() + passo, 1))
+  }
+  function escolher(data: string) {
+    mudar(data)
+    if (reduz) return fechar(true)
+    // Pulso curto no dia (a pílula desliza até ele) e depois fecha.
+    setPulso(data)
+    window.clearTimeout(fechamento.current)
+    fechamento.current = window.setTimeout(() => fechar(true), 220)
+  }
+
+  useEffect(() => {
+    if (!aberto) return
+    const fora = (e: PointerEvent) => { if (!raiz.current?.contains(e.target as Node)) fechar(false) }
+    // Escape no documento: funciona com o foco no campo ou dentro do popover.
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); fechar(true) } }
+    document.addEventListener('pointerdown', fora)
+    document.addEventListener('keydown', tecla)
+    return () => { document.removeEventListener('pointerdown', fora); document.removeEventListener('keydown', tecla) }
+  }, [aberto])
+  useEffect(() => () => window.clearTimeout(fechamento.current), [])
+
+  const hoje = formatar(new Date())
   const dias = new Date(mes.getFullYear(), mes.getMonth() + 1, 0).getDate()
-  return <div className="relative">
+  const chaveMes = mes.getFullYear() + '-' + mes.getMonth()
+  const deslize = reduz ? 0 : 24
+  return <div ref={raiz} className="relative" data-calendario-aberto={aberto || undefined}>
     <div className="flex gap-2">
       <input id={id} value={valor} onChange={e => mudar(e.target.value)} placeholder="DD/MM/AAAA" className={campo + ' num' + (compacto ? ' h-10 px-3 text-sm' : '')}
         aria-invalid={invalido} aria-describedby={descricao} required={obrigatorio} inputMode="numeric"/>
       <button type="button" ref={acionador} className={icone + (compacto ? ' size-10' : ' size-11') + ' shrink-0 border border-[rgba(15,23,42,.10)] bg-white/70'} aria-label="Abrir calendário"
-        aria-expanded={aberto} onClick={() => setAberto(!aberto)}><CalendarDays size={18} aria-hidden/></button>
+        aria-expanded={aberto} onClick={() => aberto ? fechar(false) : abrir()}><CalendarDays size={18} aria-hidden/></button>
     </div>
-    {aberto && <div className="glass mt-2 w-full max-w-72 rounded-[20px] p-3" onKeyDown={e => {
-      if (e.key === 'Escape') { e.stopPropagation(); setAberto(false); acionador.current?.focus() }
-    }}>
+    <AnimatePresence>{aberto && <motion.div role="group" aria-label="Calendário" className={'calendario glass ' + (direita ? 'right-0' : 'left-0')}
+      style={{ transformOrigin: direita ? 'top right' : 'top left' }}
+      initial={reduz ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -4 }}
+      animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: reduz ? 0 : 0.18, ease: suaveCal } }}
+      exit={reduz ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.97, y: -4, transition: { duration: 0.12, ease: 'easeIn' } }}>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <button type="button" className={icone} aria-label="Mês anterior" onClick={() => setMes(new Date(mes.getFullYear(), mes.getMonth() - 1, 1))}><ChevronLeft size={16} aria-hidden/></button>
-        <span aria-live="polite" className="text-sm font-medium">{meses[mes.getMonth()]} de {mes.getFullYear()}</span>
-        <button type="button" className={icone} aria-label="Mês seguinte" onClick={() => setMes(new Date(mes.getFullYear(), mes.getMonth() + 1, 1))}><ChevronRight size={16} aria-hidden/></button>
+        <button type="button" className={icone + ' size-8'} aria-label="Mês anterior" onClick={() => trocarMes(-1)}><ChevronLeft size={16} aria-hidden/></button>
+        <span aria-live="polite" className="relative grid h-6 flex-1 place-items-center overflow-hidden text-sm font-semibold">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={chaveMes} className="col-start-1 row-start-1 whitespace-nowrap"
+              initial={reduz ? { opacity: 0 } : { opacity: 0, filter: 'blur(3px)' }} animate={{ opacity: 1, filter: 'blur(0px)' }}
+              exit={reduz ? { opacity: 0 } : { opacity: 0, filter: 'blur(3px)' }} transition={{ duration: reduz ? 0 : 0.22 }}>
+              {meses[mes.getMonth()]} de {mes.getFullYear()}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+        <button type="button" className={icone + ' size-8'} aria-label="Mês seguinte" onClick={() => trocarMes(1)}><ChevronRight size={16} aria-hidden/></button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-sm">
-        {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => <span key={d} className="py-1 text-xs text-muted">{d}</span>)}
-        {Array.from({length: mes.getDay()}, (_, i) => <span key={'v'+i}/>)}
-        {Array.from({length: dias}, (_, i) => {
-          const data = [i+1, mes.getMonth()+1, mes.getFullYear()].map(n => String(n).padStart(2, '0')).join('/')
-          return <button key={i} type="button" className={'num rounded-full py-1.5 hover:bg-track' + (data === valor ? ' bg-ink text-white' : '')} aria-label={data}
-            onClick={() => { mudar(data); setAberto(false); acionador.current?.focus() }}>{i+1}</button>
-        })}
+      <div className="grid grid-cols-7 text-center">{diasSemana.map(d => <span key={d} className="dia-semana">{d}</span>)}</div>
+      <div className="relative overflow-hidden">
+        <AnimatePresence mode="popLayout" initial={false} custom={direcao}>
+          <motion.div key={chaveMes} className="grid grid-cols-7 gap-y-0.5 text-center text-sm" custom={direcao}
+            variants={{
+              entra: (d: number) => ({ opacity: 0, x: d * deslize }),
+              parado: { opacity: 1, x: 0 },
+              sai: (d: number) => ({ opacity: 0, x: -d * deslize }),
+            }}
+            initial="entra" animate="parado" exit="sai" transition={{ duration: reduz ? 0 : 0.22, ease: suaveCal }}>
+            {Array.from({ length: mes.getDay() }, (_, i) => <span key={'v' + i}/>)}
+            {Array.from({ length: dias }, (_, i) => {
+              const data = [i + 1, mes.getMonth() + 1, mes.getFullYear()].map(doisDigitos).join('/')
+              const selecionado = data === valor
+              return <motion.button key={data} type="button" aria-label={data} aria-pressed={selecionado}
+                className={'dia num' + (selecionado ? ' dia-selecionado' : '')}
+                initial={cascata && !reduz ? { opacity: 0, y: 4 } : false}
+                animate={pulso === data ? { opacity: 1, y: 0, scale: [1, 1.08, 1] } : { opacity: 1, y: 0, scale: 1 }}
+                transition={pulso === data ? { duration: 0.2 } : { duration: 0.2, delay: cascata ? Math.min(i * 0.008, 0.25) : 0 }}
+                onClick={() => escolher(data)}>
+                {selecionado && <motion.span aria-hidden layoutId={'dia-' + idPilula} className="dia-pilula" transition={reduz ? { duration: 0 } : molaDia}/>}
+                <span className="relative z-[1]">{i + 1}</span>
+                {data === hoje && <span aria-hidden className="dia-hoje"/>}
+              </motion.button>
+            })}
+          </motion.div>
+        </AnimatePresence>
       </div>
-    </div>}
+    </motion.div>}</AnimatePresence>
   </div>
 }
 
