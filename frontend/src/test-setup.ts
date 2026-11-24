@@ -13,3 +13,7 @@ if (typeof window !== 'undefined' && !('IntersectionObserver' in window)) {
   Object.assign(window, { IntersectionObserver: IO })
   Object.assign(globalThis, { IntersectionObserver: IO })
 }
+// jsdom não desenha canvas: os componentes com WebGL/2D detectam null e seguem sem efeito visual.
+if (typeof HTMLCanvasElement !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext
+}

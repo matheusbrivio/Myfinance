@@ -21,7 +21,7 @@ else:
     call_command("runserver", "127.0.0.1:18767", use_reloader=False)
 `
 
-test('React e templates Django usam os mesmos dados', {timeout: 90000}, async () => {
+test('React e templates Django usam os mesmos dados', {timeout: 90000}, async (t) => {
   const temp = realpathSync(tmpdir())
   const pasta = mkdtempSync(join(temp, 'myfinance-react-'))
   const env = {...process.env, DJANGO_SETTINGS_MODULE:'config.settings',
@@ -46,17 +46,29 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
     const falhas = []
     pagina.on('pageerror', erro => falhas.push(erro.message))
     await pagina.goto(origem)
-    // Intro: abre em /app/, mostra título, botão de entrar e os 3 integrantes na lista acessível.
+    // Intro: abre em /app/, mostra título, botão de segurar e os 3 integrantes na lista acessível.
     await pagina.getByRole('heading', {name:'MyFinance'}).waitFor()
     assert.equal(new URL(pagina.url()).pathname, '/app/')
-    const entrar = pagina.getByRole('button', {name:'Entrar no MyFinance'})
+    const entrar = pagina.getByRole('button', {name:'Segure para entrar no MyFinance'})
     assert.ok(await entrar.isVisible())
     assert.deepEqual(await pagina.getByRole('list', {name:'Integrantes'}).getByRole('listitem').allTextContents(),
       ['Matheus Brivio', 'Eduardo Rafael da Silva Suarez', 'Murillo Muller'])
     // Com reduced-motion a intro usa as imagens estáticas: as três precisam carregar.
     await pagina.waitForFunction(() => [...document.querySelectorAll('.intro img')].length === 3 &&
       [...document.querySelectorAll('.intro img')].every(img => img.complete && img.naturalWidth > 0))
-    await entrar.click()
+    await t.test('soltar antes de 1 s não entra', async () => {
+      await entrar.hover()
+      await pagina.mouse.down()
+      await pagina.waitForTimeout(300)
+      await pagina.mouse.up()
+      await pagina.waitForTimeout(600)
+      assert.equal(new URL(pagina.url()).pathname, '/app/')
+      assert.ok(await entrar.isVisible())
+    })
+    await entrar.hover()
+    await pagina.mouse.down()
+    await pagina.waitForTimeout(1150)
+    await pagina.mouse.up()
     await pagina.getByRole('heading', {name:'Dashboard'}).waitFor()
     assert.equal(new URL(pagina.url()).pathname, '/app/dashboard')
     await pagina.getByText('Nenhuma receita registrada para distribuir.').waitFor()
@@ -177,6 +189,16 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async ()
       }))
       assert.ok(largura.pagina <= largura.janela, 'rolagem horizontal em ' + width + ': ' + JSON.stringify(largura))
     }
+    await t.test('segurar Espaço com o botão em foco entra', async () => {
+      await pagina.goto(origem + '/app/')
+      const botao = pagina.getByRole('button', {name:'Segure para entrar no MyFinance'})
+      await botao.focus()
+      await pagina.keyboard.down('Space')
+      await pagina.waitForTimeout(1100)
+      await pagina.keyboard.up('Space')
+      await pagina.waitForURL(/\/app\/dashboard$/)
+      await pagina.getByRole('heading', {name:'Dashboard'}).waitFor()
+    })
     assert.deepEqual(falhas, [])
     const legado = await (await fetch(origem + '/transacoes/')).text()
     assert.match(legado, /Sem categoria/)

@@ -1,12 +1,8 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import { useId, useLayoutEffect, type CSSProperties, type ReactNode } from 'react';
+import { useSegurar } from '../hooks/useSegurar';
 
 import './HoldButton.css';
 
-const TAP_MS = 250;
-const HIT_PAD = 10;
-type Ease = (t: number) => number;
-type Phase = 'idle' | 'holding' | 'done';
-type Kind = 'pointer' | 'key' | null;
 
 export interface HoldButtonProps {
   children?: ReactNode;
@@ -33,8 +29,6 @@ export interface HoldButtonProps {
   className?: string;
 }
 
-const LINEAR: Ease = t => t;
-const EASE_OUT: Ease = t => 1 - Math.pow(1 - t, 3);
 
 export default function HoldButton({
   children = 'Hold to delete',
@@ -60,136 +54,14 @@ export default function HoldButton({
   onTap,
   className = ''
 }: HoldButtonProps) {
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [input, setInput] = useState<Kind>(null);
-  const phaseRef = useRef<Phase>('idle');
-  const inputRef = useRef<Kind>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const gesture = useRef<{ pointerId: number | null; start: number; rect: DOMRect | null }>({ pointerId: null, start: 0, rect: null });
-  const timers = useRef<{ complete: ReturnType<typeof setTimeout> | undefined; reset: ReturnType<typeof setTimeout> | undefined }>({ complete: undefined, reset: undefined });
+  // A mecânica de segurar (ponteiro, teclado, cancelamentos) vive no hook useSegurar.
+  // O progresso é escrito direto em --hb-p, como antes.
+  const { ref: buttonRef, fase: phase, entrada: input, handlers } = useSegurar<HTMLButtonElement>({
+    tempo: holdTime, soltar: releaseTime, desativado: disabled, reiniciarApos: resetAfter,
+    aoCompletar: onHold, aoToque: onTap,
+    aoProgresso: p => buttonRef.current?.style.setProperty('--hb-p', p.toFixed(4)),
+  });
   const hintId = useId();
-
-  const go = (next: Phase, kind: Kind = null) => {
-    phaseRef.current = next;
-    inputRef.current = kind;
-    setPhase(next);
-    setInput(kind);
-  };
-
-  const clearTimers = () => {
-    clearTimeout(timers.current.complete);
-    clearTimeout(timers.current.reset);
-  };
-
-  const motion = useRef({ raf: 0, p: 0, from: 0, to: 0, start: 0 });
-  const drive = (to: number, duration: number, ease: Ease) => {
-    const m = motion.current;
-    cancelAnimationFrame(m.raf);
-    m.from = m.p;
-    m.to = to;
-    m.start = performance.now();
-    const step = (now: number) => {
-      const t = duration > 0 ? Math.min(1, (now - m.start) / duration) : 1;
-      m.p = m.from + (m.to - m.from) * ease(t);
-      buttonRef.current?.style.setProperty('--hb-p', m.p.toFixed(4));
-      if (t < 1) {
-        m.raf = requestAnimationFrame(step);
-        return;
-      }
-      m.raf = 0;
-      if (m.to === 1) complete();
-    };
-    m.raf = requestAnimationFrame(step);
-  };
-
-  const complete = () => {
-    if (phaseRef.current !== 'holding') return;
-    if (performance.now() - gesture.current.start < holdTime - 50) return;
-    clearTimers();
-    go('done', inputRef.current);
-    onHold?.();
-    if (resetAfter > 0) {
-      timers.current.reset = setTimeout(() => {
-        go('idle');
-        drive(0, releaseTime, EASE_OUT);
-      }, resetAfter);
-    }
-  };
-
-  const begin = (kind: Kind) => {
-    if (disabled || phaseRef.current !== 'idle') return false;
-    const button = buttonRef.current;
-    if (!button) return false;
-    gesture.current.start = performance.now();
-    gesture.current.rect = button.getBoundingClientRect();
-    go('holding', kind);
-    drive(1, holdTime, LINEAR);
-    timers.current.complete = setTimeout(complete, holdTime + 100);
-    return true;
-  };
-
-  const release = ({ drifted = false }: { drifted?: boolean } = {}) => {
-    if (phaseRef.current !== 'holding') return;
-    clearTimers();
-    const held = performance.now() - gesture.current.start;
-    go('idle');
-    drive(0, releaseTime, EASE_OUT);
-    if (!drifted && held < TAP_MS) onTap?.();
-  };
-  const releaseRef = useRef(release);
-  releaseRef.current = release;
-
-  const handlePointerDown = (e: PointerEvent<HTMLButtonElement>) => {
-    if (e.button !== 0 || !e.isPrimary || gesture.current.pointerId !== null) return;
-    if (!begin('pointer')) return;
-    gesture.current.pointerId = e.pointerId;
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
-  };
-
-  const endPointer = (e: PointerEvent<HTMLButtonElement>, options?: { drifted?: boolean }) => {
-    if (e.pointerId !== gesture.current.pointerId) return;
-    gesture.current.pointerId = null;
-    try {
-      if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
-    release(options);
-  };
-
-  const handlePointerMove = (e: PointerEvent<HTMLButtonElement>) => {
-    if (e.pointerId !== gesture.current.pointerId) return;
-    const r = gesture.current.rect;
-    if (!r) return;
-    const out =
-      e.clientX < r.left - HIT_PAD ||
-      e.clientX > r.right + HIT_PAD ||
-      e.clientY < r.top - HIT_PAD ||
-      e.clientY > r.bottom + HIT_PAD;
-    if (out) endPointer(e, { drifted: true });
-  };
-
-  const handlePointerLeave = (e: PointerEvent<HTMLButtonElement>) => {
-    if (e.pointerType !== 'touch') endPointer(e, { drifted: true });
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'Escape') {
-      if (inputRef.current === 'key') release({ drifted: true });
-      return;
-    }
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      if (!e.repeat) begin('key');
-    }
-  };
-
-  const handleKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      if (inputRef.current === 'key') release();
-    }
-  };
 
   useLayoutEffect(() => {
     const button = buttonRef.current;
@@ -202,30 +74,6 @@ export default function HoldButton({
     const ro = new ResizeObserver(measure);
     ro.observe(button);
     return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (phase !== 'holding') return undefined;
-    const cancel = () => releaseRef.current({ drifted: true });
-    const onVisibility = () => {
-      if (document.hidden) cancel();
-    };
-    window.addEventListener('blur', cancel);
-    document.addEventListener('visibilitychange', onVisibility);
-    return () => {
-      window.removeEventListener('blur', cancel);
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, [phase]);
-
-  useEffect(() => {
-    const t = timers.current;
-    const m = motion.current;
-    return () => {
-      clearTimeout(t.complete);
-      clearTimeout(t.reset);
-      cancelAnimationFrame(m.raf);
-    };
   }, []);
 
   const direction = fillDirection === 'up' ? 'up' : 'right';
@@ -265,15 +113,7 @@ export default function HoldButton({
         '--hb-press': pressScale,
         '--hb-wave': `${wave ? waveAmplitude : 0}px`
       } as CSSProperties}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={e => endPointer(e)}
-      onPointerCancel={e => endPointer(e, { drifted: true })}
-      onLostPointerCapture={e => endPointer(e, { drifted: true })}
-      onPointerLeave={handlePointerLeave}
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-      onContextMenu={e => e.preventDefault()}
+      {...handlers}
     >
       <span className="hold-button__pulse" aria-hidden="true" />
       <span className="hold-button__label">{labels}</span>

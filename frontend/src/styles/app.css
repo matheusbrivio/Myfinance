@@ -273,7 +273,10 @@ select.campo option { background: #fff; color: var(--text); }
 /* Os três Lanyards ficam empilhados cobrindo a tela inteira. */
 .intro-crachas { position: absolute; inset: 0; }
 .intro-lanyard { position: absolute !important; inset: 0; }
-.intro-texto { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 16px 40px; text-align: center; }
+.intro-texto { position: absolute; left: 0; right: 0; bottom: 40px; z-index: 2; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+.botao-entrar { display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: auto; }
+.botao-entrar .specular-button { touch-action: none; user-select: none; -webkit-user-select: none; }
+.dica-entrar { font-size: 12px; color: var(--text-muted); }
 .intro-rotulo { font-size: 13px; font-weight: 500; color: var(--text-soft); }
 /* Logo à esquerda e rótulo à direita, nos cantos de cima (as fitas não passam ali). */
 .intro-topo { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -284,11 +287,6 @@ select.campo option { background: #fff; color: var(--text); }
 .intro-crachas { z-index: 1; }
 .intro-leque { z-index: 1; padding-top: 72px; }
 @media (max-width: 767px) { .intro-topo .intro-rotulo { font-size: 12px; text-align: right; } }
-.intro-play { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-soft); }
-.botao-play { position: relative; z-index: 1; display: grid; place-items: center; width: 88px; height: 88px; border-radius: 50%;
-  background: var(--ink); color: #fff; padding-left: 5px; box-shadow: 0 14px 30px -14px rgba(15, 23, 42, .6); }
-.botao-play:disabled { cursor: default; }
-.play-anel { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--ink); pointer-events: none; }
 /* Fallback (celular, reduced-motion ou sem WebGL): as 3 frentes em leque sobrepostas, cada uma pendurada pela fita. */
 .intro-leque { position: relative; display: flex; height: 60svh; align-items: flex-start; justify-content: center; }
 .intro-estatico { position: relative; display: flex; width: min(38vw, 260px, 30svh); height: 100%; flex-direction: column; align-items: center;

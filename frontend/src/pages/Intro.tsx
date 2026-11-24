@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import { ChartNoAxesCombined, Play } from 'lucide-react'
+import { ChartNoAxesCombined } from 'lucide-react'
+import { BotaoEntrar } from '../components/BotaoEntrar'
 import { FundoLiquido } from '../components/FundoLiquido'
 import type { LanyardProps } from '../components/Lanyard'
 
@@ -99,19 +100,7 @@ export default function Intro() {
         </div>)}
       </div>}
       <div className="intro-texto">
-        <div className="intro-play">
-          <span className="relative grid place-items-center">
-            {/* Anel que pulsa suave a cada 2,4 s enquanto o botão está parado. */}
-            {!reduz && <motion.span aria-hidden className="play-anel" initial={{ opacity: 0.55, scale: 1 }}
-              animate={{ opacity: [0.55, 0], scale: [1, 1.45] }} transition={{ duration: 1.6, ease: 'easeOut', repeat: Infinity, repeatDelay: 0.8 }}/>}
-            <motion.button type="button" className="botao-play" aria-label="Entrar no MyFinance" onClick={entrar} disabled={saindo}
-              whileHover={reduz ? undefined : { scale: 1.06 }} whileTap={reduz ? undefined : { scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
-              <Play size={30} fill="currentColor" aria-hidden/>
-            </motion.button>
-          </span>
-          <span aria-hidden>Entrar no site</span>
-        </div>
+        <BotaoEntrar aoEntrar={entrar}/>
       </div>
     </motion.div>
   </div>
