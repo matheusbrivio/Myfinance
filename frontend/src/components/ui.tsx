@@ -4,10 +4,10 @@ import { motion, useReducedMotion } from 'motion/react'
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 
-export const botao = 'inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 text-sm font-semibold hover:bg-line disabled:opacity-50'
-export const primario = botao + ' bg-accent text-base hover:bg-sky-300'
-export const campo = 'w-full rounded-lg border border-line bg-base px-3 py-2 text-sm aria-invalid:border-bad'
-export const painel = 'min-w-0 rounded-2xl border border-line bg-panel p-5 shadow-sm'
+export const botao = 'inline-flex items-center justify-center gap-2 rounded-[10px] border border-line px-3 py-2 text-sm font-medium hover:bg-line disabled:opacity-50'
+export const primario = botao + ' bg-accent text-base border-accent hover:bg-sky-200'
+export const campo = 'w-full rounded-[10px] border border-line bg-base px-3 py-2 text-sm aria-invalid:border-bad'
+export const painel = 'min-w-0 rounded-xl border border-line bg-panel/95 p-5'
 
 export function Painel({ children, className = '' }: { children: ReactNode; className?: string }) {
   const reduz = useReducedMotion()
