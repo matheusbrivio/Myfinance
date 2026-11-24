@@ -127,3 +127,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 .confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; animation: confete .6s cubic-bezier(.1,.7,.3,1) forwards; }
 @keyframes confete { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
 .barra-meta { transition: width .3s ease-out; }
+/* Faixa do GlowCursor: só o topo vívido; sem captura de ponteiro. */
+.fundo-faixa { position: absolute; top: 0; left: 0; right: 0; height: 340px; pointer-events: none; }
+.fundo-faixa .glow-cursor, .fundo-faixa canvas { pointer-events: none; }
