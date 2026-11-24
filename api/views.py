@@ -17,6 +17,7 @@ from metas.services import criar_meta_validada, encerrar, historico, movimentar
 from transacoes.models import Transacao
 from transacoes.saldos import saldos
 
+from .exemplo import BaseComDados, popular_exemplo
 from .http import Conflito, envelope, idempotente
 from .projecoes import dinheiro, graficos, meta_json, reservas
 from .serializers import (
@@ -223,9 +224,21 @@ class Resumo(JSONView):
             "saldos": {nome: dinheiro(valor) for nome, valor in resumo.items()},
             "recentes": TransacaoSerializer(Transacao.objects.select_related("categoria")[:5], many=True).data,
             "metas": [meta_json(meta, saldos_metas[meta.pk], resumo["disponivel"]) for meta in metas],
+            # Base sem nenhuma transação: o dashboard oferece os dados de exemplo.
+            "vazia": not Transacao.objects.exists(),
         })
 
 
 class Graficos(JSONView):
     def get(self, request):
         return Response(graficos())
+
+
+class Exemplo(JSONView):
+    """Carrega os dados de exemplo; só numa base sem transações."""
+
+    def post(self, request):
+        try:
+            return Response(popular_exemplo(), status=201)
+        except BaseComDados as erro:
+            raise Conflito(str(erro))

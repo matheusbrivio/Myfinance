@@ -25,7 +25,9 @@ export function Layout() {
   // Recarrega as categorias a cada abertura: uma categoria criada depois já aparece no modal.
   const cats = useUltimo(useQuery('categorias#' + aberturas, signal => todas<Categoria>('categorias/', signal)).data)
   const opcoes = (cats ?? []).map(c => ({ valor: String(c.id), rotulo: c.nome }))
-  return <AtualizacaoContext.Provider value={{ versao }}>
+  const abrirNovaTransacao = () => { setAberturas(n => n + 1); setNova(true) }
+  const recarregar = () => setVersao(v => v + 1)
+  return <AtualizacaoContext.Provider value={{ versao, abrirNovaTransacao, recarregar }}>
     <div className="min-h-screen">
       <div className="app">
         {/* Uma única barra de vidro, fixa no topo. No celular o menu vai para uma barra no rodapé. */}
@@ -40,7 +42,7 @@ export function Layout() {
                   <span className="pilula-texto menu-rotulo"><Icone className="menu-icone" size={18} aria-hidden/>{titulo}</span></>}
               </NavLink>)}
             </nav>
-            <button type="button" className="cta" onClick={() => { setAberturas(n => n + 1); setNova(true) }}>
+            <button type="button" className="cta" onClick={abrirNovaTransacao}>
               <span className="cta-texto">Nova transação</span><Plus size={18} aria-hidden/></button>
           </header>
         </div>

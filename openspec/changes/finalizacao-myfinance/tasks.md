@@ -7,7 +7,7 @@
 
 ## 2. Dados de exemplo
 
-- [ ] 2.1 Implementar `popular_exemplo()` com 6 categorias, 3 meses de transações relativas a hoje e 3 metas (uma concluída), pelos serializers e serviços existentes; expor `POST /api/v1/exemplo/` (409 com dados) e o comando `popular_exemplo --limpar`; card no estado vazio do dashboard. Testar saldos consistentes, recusa com 409 e o comando com `--limpar`.
+- [x] 2.1 Implementar `popular_exemplo()` com 6 categorias, 3 meses de transações relativas a hoje e 3 metas (uma concluída), pelos serializers e serviços existentes; expor `POST /api/v1/exemplo/` (409 com dados) e o comando `popular_exemplo --limpar`; card no estado vazio do dashboard. Testar saldos consistentes, recusa com 409 e o comando com `--limpar`.
 
 ## 3. Dashboard por mês
 

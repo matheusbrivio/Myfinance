@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { ChartNoAxesCombined } from 'lucide-react'
+import { BoasVindas } from '../components/BoasVindas'
 import { api } from '../services/api'
 import { moeda } from '../services/format'
 import { useQuery } from '../hooks/useQuery'
@@ -50,11 +50,7 @@ export function Dashboard() {
   return <div className="grade items-start">
     <h1 className="sr-only">Dashboard</h1>
     {q.error && <div className="col-span-12"><Estado carregando={false} erro={q.error} tentar={q.reload}/></div>}
-    {vazio && <Entrada className="col-span-12"><Painel className="vazio-dashboard">
-      <span className="vazio-icone" aria-hidden><ChartNoAxesCombined size={36}/></span>
-      <div><h2 className="titulo-card">Comece registrando sua primeira receita</h2>
-        <p className="mt-1 text-sm text-soft">Use o botão “Nova transação” no topo. Os gráficos e metas aparecem assim que houver movimento.</p></div>
-    </Painel></Entrada>}
+    {(resumo.vazia ?? vazio) && <Entrada className="col-span-12"><BoasVindas/></Entrada>}
 
     <Entrada className="col-span-12 bento:col-span-8 self-stretch"><Painel className="hero flex h-full flex-col">
       <h2 className="rotulo-hero">Saldo disponível<span> · {mesAno()}</span></h2>

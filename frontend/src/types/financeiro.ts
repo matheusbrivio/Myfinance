@@ -13,6 +13,8 @@ export interface Lista<T> { resultados: T[]; pagina: number; total: number }
 export interface Resumo {
   saldos: { disponivel: string; reservado: string; patrimonio: string; receitas: string; despesas: string }
   recentes: Transacao[]; metas: Meta[]
+  /** true quando não há nenhuma transação (oferece os dados de exemplo). */
+  vazia?: boolean
 }
 export interface Segmento { id: string | number | null; nome: string; percentual: string; valor: string; proporcao: number }
 export interface Graficos { distribuicao: Segmento[]; despesas_por_categoria: Segmento[]; retiradas: string }
