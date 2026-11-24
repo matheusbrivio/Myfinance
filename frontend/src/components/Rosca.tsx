@@ -13,9 +13,9 @@ class LimiteGrafico extends Component<{ children: ReactNode }, { falhou: boolean
 }
 
 // Distribuição: rosca de 160px com pontas arredondadas, total de receitas no centro e legenda embaixo.
-export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
+export function Rosca({ saldos, mensal = false }: { saldos: Resumo['saldos']; mensal?: boolean }) {
   const reduz = useReducedMotion()
-  const distribuicao = distribuirDinheiro(saldos)
+  const distribuicao = distribuirDinheiro(saldos, mensal)
   const setores = distribuicao.estado === 'valido' ? distribuicao.segmentos.filter(s => s.proporcao > 0) : []
   return <Painel className="h-full"><CabecalhoCard titulo="Distribuição do dinheiro"/>
     {distribuicao.estado === 'vazio' ? <p className="text-muted">Nenhuma receita registrada para distribuir.</p> :
@@ -45,7 +45,7 @@ export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
         </div>
       </div></LimiteGrafico> : <p className="text-muted">
         {distribuicao.estado === 'negativo'
-          ? 'O saldo disponível está negativo. Veja os valores reais abaixo, sem percentuais.'
+          ? (mensal ? 'A sobra do mês está negativa: saiu mais do que entrou.' : 'O saldo disponível está negativo.') + ' Veja os valores reais abaixo, sem percentuais.'
           : 'Os valores não formam uma distribuição do total de receitas. Veja os valores reais abaixo, sem percentuais.'}
       </p>}
       <ul aria-label="Legenda da distribuição" className="grid">{distribuicao.segmentos.map(s => <li key={s.id} className="legenda-item">

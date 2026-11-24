@@ -15,6 +15,10 @@ export interface Resumo {
   recentes: Transacao[]; metas: Meta[]
   /** true quando não há nenhuma transação (oferece os dados de exemplo). */
   vazia?: boolean
+  /** Só com ?mes=AAAA-MM: fluxos do mês. `saldos` traz receitas/despesas do mês e a posição no fim dele. */
+  mes?: { inicio: string; fim: string; receitas: string; despesas: string; reservado: string; sobra: string }
 }
 export interface Segmento { id: string | number | null; nome: string; percentual: string; valor: string; proporcao: number }
 export interface Graficos { distribuicao: Segmento[]; despesas_por_categoria: Segmento[]; retiradas: string }
+/** Frase do "Resumo do mês" (GET /api/v1/insights/). */
+export interface Insight { tipo: string; tom: 'positivo' | 'neutro' | 'alerta'; texto: string }

@@ -11,7 +11,7 @@
 
 ## 3. Dashboard por mês
 
-- [ ] 3.1 Aceitar `?mes=AAAA-MM` em `resumo/` e `graficos/` com fluxos do mês, posição no fim do mês, distribuição do mês e recentes do mês; 400 para mês inválido ou futuro. Seletor de mês acessível com o mês na URL. Testar último dia do mês, mês sem movimento e retirada de meta.
+- [x] 3.1 Aceitar `?mes=AAAA-MM` em `resumo/` e `graficos/` com fluxos do mês, posição no fim do mês, distribuição do mês e recentes do mês; 400 para mês inválido ou futuro. Seletor de mês acessível com o mês na URL. Testar último dia do mês, mês sem movimento e retirada de meta.
 
 ## 4. Insights do mês
 

@@ -144,13 +144,24 @@ test('React e templates Django usam os mesmos dados', {timeout: 90000}, async (t
     const legenda = pagina.getByRole('list', {name:'Legenda da distribuição'})
     await pagina.getByText('Total de receitas', {exact:true}).waitFor()
     for (const [nome, texto, cor] of [
-      ['Saldo disponível', '25,00% · R$ 50,00', '#2563EB'],
-      ['Despesas convencionais', '50,00% · R$ 100,00', '#E11D48'],
-      ['Reservado em metas', '25,00% · R$ 50,00', '#F59E0B'],
+      ['Sobra do mês', '25,00% · R$ 50,00', '#2563EB'],
+      ['Despesas do mês', '50,00% · R$ 100,00', '#E11D48'],
+      ['Reservado no mês', '25,00% · R$ 50,00', '#F59E0B'],
     ]) {
       await legenda.getByRole('listitem').filter({hasText:nome}).getByText(texto).waitFor()
       await pagina.locator(`path[fill="${cor}"]`).first().waitFor()
     }
+    // Seletor de mês: no mês atual não avança; o mês anterior não tem movimento; o mês vai para a URL.
+    assert.ok(await pagina.getByRole('button', {name:'Próximo mês'}).isDisabled())
+    // Sem `mes`, a API continua devolvendo os totais desde o início (a interface agora mostra o mês).
+    const total = await (await fetch(origem + '/api/v1/resumo/')).json()
+    assert.deepEqual([total.saldos.disponivel, total.saldos.despesas, total.saldos.reservado], ['50.00', '100.00', '50.00'])
+    await pagina.getByRole('button', {name:'Mês anterior'}).focus()
+    await pagina.keyboard.press('Enter')
+    await pagina.waitForURL(/[?&]mes=\d{4}-\d{2}/)
+    await pagina.getByText('Nenhuma receita registrada para distribuir.').waitFor()
+    await pagina.getByRole('button', {name:'Próximo mês'}).click()
+    await legenda.getByRole('listitem').filter({hasText:'Sobra do mês'}).getByText('25,00% · R$ 50,00').waitFor()
     await nav.getByRole('link', {name:'Metas'}).click()
     await pagina.getByRole('link', {name:'Retirar', exact:true}).click()
     const retirada = pagina.getByRole('dialog')

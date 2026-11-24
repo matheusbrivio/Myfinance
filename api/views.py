@@ -19,6 +19,7 @@ from transacoes.saldos import saldos
 
 from .exemplo import BaseComDados, popular_exemplo
 from .http import Conflito, envelope, idempotente
+from . import mensal
 from .projecoes import dinheiro, graficos, meta_json, reservas
 from .serializers import (
     CONVENCIONAIS, CategoriaSerializer, FiltroSerializer, MetaSerializer,
@@ -217,21 +218,36 @@ class Historico(JSONView):
 class Resumo(JSONView):
     @transaction.atomic
     def get(self, request):
+        periodo = mensal.periodo_da_requisicao(request)
         resumo = saldos()
         metas = list(Meta.objects.filter(arquivada_em__isnull=True))
         saldos_metas = reservas(metas)
+        recentes = Transacao.objects.select_related("categoria")
+        dados = {}
+        if periodo:
+            # Com ?mes: receitas e despesas do mês; disponível, reservado e patrimônio até o fim do mês.
+            inicio, fim = periodo
+            fluxo = mensal.fluxos(inicio, fim)
+            posicao = mensal.posicao(fim)
+            exibidos = posicao | {"receitas": fluxo["receitas"], "despesas": fluxo["despesas"]}
+            recentes = recentes.filter(data__range=periodo)
+            dados["mes"] = {"inicio": inicio.isoformat(), "fim": fim.isoformat()} | {
+                campo: dinheiro(fluxo[campo]) for campo in ("receitas", "despesas", "reservado", "sobra")}
+        else:
+            exibidos = resumo
         return Response({
-            "saldos": {nome: dinheiro(valor) for nome, valor in resumo.items()},
-            "recentes": TransacaoSerializer(Transacao.objects.select_related("categoria")[:5], many=True).data,
+            "saldos": {nome: dinheiro(exibidos[nome]) for nome in resumo},
+            "recentes": TransacaoSerializer(recentes[:5], many=True).data,
             "metas": [meta_json(meta, saldos_metas[meta.pk], resumo["disponivel"]) for meta in metas],
             # Base sem nenhuma transação: o dashboard oferece os dados de exemplo.
             "vazia": not Transacao.objects.exists(),
-        })
+        } | dados)
 
 
 class Graficos(JSONView):
     def get(self, request):
-        return Response(graficos())
+        periodo = mensal.periodo_da_requisicao(request)
+        return Response(graficos(*periodo) if periodo else graficos())
 
 
 class Exemplo(JSONView):

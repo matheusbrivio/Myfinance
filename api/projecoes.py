@@ -49,11 +49,32 @@ def segmentos(linhas):
     ]
 
 
-def graficos():
+def distribuicao_do_mes(totais):
+    """Receitas do mês divididas em despesas, reservado líquido e sobra (que pode ser negativa)."""
+    receitas = totais[Transacao.Tipo.RECEITA]
+    if receitas <= 0:
+        return []
+    despesas = totais[Transacao.Tipo.DESPESA]
+    reservado = totais[Transacao.Tipo.APORTE_META] - totais[Transacao.Tipo.RETIRADA_META]
+    partes = [("despesas", "Despesas do mês", despesas), ("reservado", "Reservado no mês", reservado),
+              ("sobra", "Sobra do mês", receitas - despesas - reservado)]
+    return [
+        {"id": id_, "nome": nome, "valor": dinheiro(valor),
+         "percentual": str((Decimal(valor * 100) / receitas).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)),
+         "proporcao": valor / receitas}
+        for id_, nome, valor in partes
+    ]
+
+
+def graficos(inicio=None, fim=None):
+    """Sem período: totais desde o início (contrato original). Com período: só o mês."""
     totais = defaultdict(int)
     despesas = defaultdict(int)
     nomes = {}
-    for tipo, valor, id_, nome in Transacao.objects.order_by().values_list(
+    transacoes = Transacao.objects.order_by()
+    if inicio is not None:
+        transacoes = transacoes.filter(data__range=(inicio, fim))
+    for tipo, valor, id_, nome in transacoes.values_list(
         "tipo", "valor", "categoria_id", "categoria__nome",
     ).iterator():
         inteiro = centavos(valor)
@@ -62,8 +83,12 @@ def graficos():
             despesas[id_] += inteiro
             nomes[id_] = nome or "Sem categoria"
     classes = [Transacao.Tipo.RECEITA, Transacao.Tipo.DESPESA, Transacao.Tipo.APORTE_META]
+    if inicio is None:
+        distribuicao = segmentos([(t.value, t.label, totais[t]) for t in classes])
+    else:
+        distribuicao = distribuicao_do_mes(totais)
     return {
-        "distribuicao": segmentos([(t.value, t.label, totais[t]) for t in classes]),
+        "distribuicao": distribuicao,
         "despesas_por_categoria": segmentos([
             (id_, nomes[id_], despesas[id_]) for id_ in sorted(despesas, key=lambda x: (x is None, x))
         ]),

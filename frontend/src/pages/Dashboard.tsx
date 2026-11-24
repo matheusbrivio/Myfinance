@@ -1,4 +1,5 @@
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
+import { SeletorMes, chaveMes, mesValido } from '../components/SeletorMes'
 import { BoasVindas } from '../components/BoasVindas'
 import { api } from '../services/api'
 import { moeda } from '../services/format'
@@ -20,7 +21,6 @@ const indicadores = [
   ['receitas', 'Receitas', 'var(--income)'], ['despesas', 'Despesas', 'var(--expense)'],
   ['reservado', 'Em metas', 'var(--goal)'], ['patrimonio', 'Patrimônio total', 'var(--available)'],
 ] as const
-const mesAno = () => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date())
 
 // Saldo grande; os centavos ficam em --text-muted.
 function Saldo({ texto }: { texto: string }) {
@@ -37,23 +37,40 @@ function Saldo({ texto }: { texto: string }) {
  */
 export function Dashboard() {
   const { versao } = useAtualizacao()
-  const q = useQuery('dashboard#' + versao, signal => api<Resumo>('resumo/', { signal }))
-  const g = useQuery('graficos#' + versao, async signal => (await api<Graficos>('graficos/', { signal })) ?? null)
+  // O mês fica na URL (?mes=AAAA-MM); sem ele, ou com valor inválido, o mês atual.
+  const [params, setParams] = useSearchParams()
+  const atual = chaveMes()
+  const mes = mesValido(params.get('mes'), atual)
+  const mudarMes = (novo: string) => {
+    const proximos = new URLSearchParams(params)
+    if (novo === atual) proximos.delete('mes'); else proximos.set('mes', novo)
+    setParams(proximos, { replace: true })
+  }
+  const q = useQuery(`dashboard#${mes}#${versao}`, signal => api<Resumo>('resumo/?mes=' + mes, { signal }))
+  const g = useQuery(`graficos#${mes}#${versao}`, async signal => (await api<Graficos>('graficos/?mes=' + mes, { signal })) ?? null)
   const graficos = useUltimo(g.data)
   const resumo = useUltimo(q.data)
   if (!resumo) return <><h1 className="sr-only">Dashboard</h1><Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/></>
-  const distribuicao = distribuirDinheiro(resumo.saldos)
+  // Distribuição do mês: receitas do mês em despesas, reservado líquido e sobra.
+  const base = resumo.mes ? { ...resumo.saldos, receitas: resumo.mes.receitas, despesas: resumo.mes.despesas,
+    reservado: resumo.mes.reservado, disponivel: resumo.mes.sobra } : resumo.saldos
+  const distribuicao = distribuirDinheiro(base, !!resumo.mes)
   const livre = distribuicao.estado === 'valido' ? distribuicao.segmentos[0].percentual : null
   const despesas = graficos?.despesas_por_categoria ?? []
   const vazio = distribuicao.estado === 'vazio'
   const metas = resumo.metas.slice(0, 3)
-  return <div className="grade items-start">
+  // Enquanto o mês novo carrega, os números do anterior ficam esmaecidos (e trocam com cross-fade ao chegar).
+  const atualizando = !q.data && !q.error
+  return <div className={'grade items-start transition-opacity' + (atualizando ? ' opacity-60' : '')} aria-busy={atualizando}>
     <h1 className="sr-only">Dashboard</h1>
     {q.error && <div className="col-span-12"><Estado carregando={false} erro={q.error} tentar={q.reload}/></div>}
     {(resumo.vazia ?? vazio) && <Entrada className="col-span-12"><BoasVindas/></Entrada>}
 
     <Entrada className="col-span-12 bento:col-span-8 self-stretch"><Painel className="hero flex h-full flex-col">
-      <h2 className="rotulo-hero">Saldo disponível<span> · {mesAno()}</span></h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="rotulo-hero">Saldo disponível<span className="sr-only"> no fim do mês selecionado</span></h2>
+        <SeletorMes mes={mes} atual={atual} mudar={mudarMes}/>
+      </div>
       <p className={'mt-2 break-all ' + (resumo.saldos.disponivel.startsWith('-') ? 'text-bad' : 'text-text')}><Saldo texto={moeda(resumo.saldos.disponivel)}/></p>
       {livre && <p className="frase-hero"><em>{livre}</em> do que entrou continua livre</p>}
       <dl className="indicadores">{indicadores.map(([id, rotulo, cor]) => <div key={id} className="indicador">
@@ -62,7 +79,7 @@ export function Dashboard() {
       </div>)}</dl>
     </Painel></Entrada>
 
-    <Entrada className="col-span-12 bento:col-span-4 self-stretch" delay={0.06}><Rosca saldos={resumo.saldos}/></Entrada>
+    <Entrada className="col-span-12 bento:col-span-4 self-stretch" delay={0.06}><Rosca saldos={base} mensal={!!resumo.mes}/></Entrada>
 
     <Entrada className="col-span-12 bento:col-span-8 bento:row-span-2 self-stretch" delay={0.1} trigger="scroll">
       <Painel className="h-full"><CabecalhoCard titulo="Transações recentes" acao={resumo.recentes.length > 0 && <VerTodas para="/transacoes" rotulo="Ver todas as transações"/>}/>
