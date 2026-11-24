@@ -61,7 +61,7 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 /* Barra superior: logo, menu em pílula de vidro e CTA âmbar. */
 .barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1320px; margin: 0 auto; padding: 24px 40px; }
 .marca { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-.marca img { width: 40px; height: 40px; }
+.marca-icone { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--ink); color: #fff; }
 .marca span { font-size: 17px; font-weight: 600; letter-spacing: -.02em; line-height: 1; }
 .pilula-grupo { position: relative; display: inline-flex; gap: 2px; padding: 6px; border-radius: 999px; }
 .pilula-item { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 21px; border-radius: 999px;
@@ -200,10 +200,9 @@ select.campo option { background: #fff; color: var(--text); }
 .esq { height: 64px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, .75);
   background: linear-gradient(100deg, rgba(255,255,255,.55) 30%, rgba(255,255,255,.9) 50%, rgba(255,255,255,.55) 70%) 0 0 / 220% 100%; }
 
-/* Accordion, confete, logo elétrica */
+/* Accordion e confete */
 .acordeao-gatilho { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
 .confete { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
 .confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; }
-.logo-eletrica { position: relative; display: grid; place-items: center; flex: none; max-width: 100%; }
-.logo-estatica { filter: drop-shadow(0 0 22px rgba(95, 180, 224, .55)); }
+.vazio-icone { display: grid; flex: none; place-items: center; width: 72px; height: 72px; border-radius: 20px; background: var(--ink); color: #fff; }
 .segmento-radio { position: absolute; inset: 0; z-index: 2; margin: 0; opacity: 0; cursor: pointer; appearance: none; }

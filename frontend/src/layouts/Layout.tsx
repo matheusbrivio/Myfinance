@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { ChartNoAxesCombined, Plus } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { motion } from 'motion/react'
 import { PilulaAtiva } from '../components/Abas'
@@ -32,7 +32,7 @@ export function Layout() {
       <div className="app">
         <header className="barra">
           <NavLink to="/" className="marca" aria-label="MyFinance, ir para o Dashboard">
-            <img src="/react-assets/logo.svg" alt="" width={40} height={40}/><span>MyFinance</span>
+            <span className="marca-icone"><ChartNoAxesCombined size={18} aria-hidden/></span><span>MyFinance</span>
           </NavLink>
           <nav aria-label="Principal" className="pilula-grupo glass menu">
             {paginas.map(({ caminho, titulo }) => <NavLink end={caminho === '/'} key={caminho} to={caminho} className="pilula-item">

@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { ChartNoAxesCombined } from 'lucide-react'
 import { api } from '../services/api'
 import { moeda } from '../services/format'
 import { useQuery } from '../hooks/useQuery'
@@ -11,7 +12,6 @@ import { Estado, Painel, Secao } from '../components/ui'
 import { Numero } from '../components/Numero'
 import { Entrada } from '../components/Entrada'
 import { Barra } from '../components/Barra'
-import { LogoEletrica } from '../components/LogoEletrica'
 import { useUltimo } from '../hooks/useUltimo'
 import type { Graficos, Resumo } from '../types/financeiro'
 import { distribuirDinheiro } from '../services/distribuicao'
@@ -54,7 +54,7 @@ export function Dashboard() {
       </div>
     </section></Entrada>
     {vazio && <Entrada><Painel className="vazio-dashboard">
-      <LogoEletrica tamanho={320}/>
+      <span className="vazio-icone" aria-hidden><ChartNoAxesCombined size={36}/></span>
       <div><h2 className="titulo-card">Comece registrando sua primeira receita</h2>
         <p className="mt-2 text-soft">Use o botão “Nova transação” no topo. Os gráficos e metas aparecem assim que houver movimento.</p></div>
     </Painel></Entrada>}
