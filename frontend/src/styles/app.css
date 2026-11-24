@@ -271,8 +271,7 @@ select.campo option { background: #fff; color: var(--text); }
 .intro { position: relative; height: 100svh; overflow: hidden; }
 .intro-conteudo { position: relative; z-index: 1; height: 100%; }
 /* Os três Lanyards ficam empilhados cobrindo a tela inteira. */
-.intro-crachas { position: absolute; inset: 0; }
-.intro-lanyard { position: absolute !important; inset: 0; }
+.intro-crachas { position: absolute !important; inset: 0; }
 .intro-texto { position: absolute; left: 0; right: 0; bottom: 40px; z-index: 2; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
 .botao-entrar { display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: auto; }
 .botao-entrar .specular-button { touch-action: none; user-select: none; -webkit-user-select: none; }
@@ -300,7 +299,8 @@ select.campo option { background: #fff; color: var(--text); }
 
 /* Camada de profundidade do fundo: manchas, grade de pontos e granulado. */
 /* 30vh mais alta que a tela: no app ela fica deslocada -30vh (paralaxe) e mostra a parte de baixo. */
-.fundo-camada { position: absolute; inset: 0 0 -30vh; }
+.fundo-camada { position: absolute; inset: 0 0 -30vh; will-change: transform; }
+/* As manchas desfocadas ficam numa camada própria desde o início: promover só na transição re-rasterizava o blur no meio dela. */
 .fundo-mancha { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; }
 .fundo-mancha-a { width: 42vw; height: 42vw; left: -10vw; top: -12vw; background: #BFDBFE; }
 .fundo-mancha-b { width: 38vw; height: 38vw; right: -8vw; top: calc(100vh - 24vw); background: #FED7AA; }
@@ -308,7 +308,8 @@ select.campo option { background: #fff; color: var(--text); }
 .fundo-mancha-d { width: 38vw; height: 38vw; right: -8vw; top: calc(130vh - 24vw); background: #FED7AA; }
 .fundo-pontos { position: absolute; inset: -40vh 0 0; background-image: radial-gradient(rgba(15, 23, 42, .09) 1px, transparent 1.2px); background-size: 22px 22px;
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); }
-.fundo-grao { position: absolute; inset: 0; opacity: .06; mix-blend-mode: multiply;
+/* Sem mix-blend-mode: sobre o fluido animado, o multiply obrigava a recompor a tela inteira a cada quadro (no fundo claro, o resultado é quase igual). */
+.fundo-grao { position: absolute; inset: 0; opacity: .05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
 /* Cenas intro ↔ app: durante a descida, a cena que entra fica fixa na tela (a que sai é absolute). */
