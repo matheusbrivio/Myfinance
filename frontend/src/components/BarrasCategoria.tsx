@@ -14,6 +14,6 @@ export function BarrasCategoria({ dados, total }: { dados: Graficos['despesas_po
       <div className="trilho"><Barra className="barra-categoria" largura={Math.max(2, d.proporcao * 100)} atraso={i * 0.08}/></div>
     </li>)}</ul>
     <p className="mt-6 flex items-baseline justify-between border-t border-line pt-4 text-sm text-muted">Total em despesas
-      <strong className="serif text-2xl font-normal text-text">{moeda(total)}</strong></p>
+      <strong className="forte text-xl text-text">{moeda(total)}</strong></p>
   </Painel>
 }

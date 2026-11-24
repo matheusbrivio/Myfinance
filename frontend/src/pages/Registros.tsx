@@ -97,7 +97,7 @@ export function Transacoes() {
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
     <Entrada agrupar className="mb-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">{resumos.map(r => <Painel key={r.rotulo}>
       <h2 className="rotulo-secao">{r.rotulo}</h2>
-      <p className={(r.mono ? 'num text-2xl' : 'serif text-4xl') + ' mt-2 break-all'} style={{ color: r.cor }}>{lista ? <Numero texto={r.valor}/> : '—'}</p>
+      <p className={(r.mono ? 'num text-2xl' : 'forte text-3xl') + ' mt-2 break-all'} style={{ color: r.cor }}>{lista ? <Numero texto={r.valor}/> : '—'}</p>
     </Painel>)}</Entrada>
     <Entrada><Filtros key={chaveFiltros} params={params} opcoes={opcoes} setParams={setParams}/></Entrada>
     {q.error && lista && <Estado carregando={false} erro={q.error} tentar={q.reload}/>}

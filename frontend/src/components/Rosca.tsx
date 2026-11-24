@@ -41,7 +41,7 @@ export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
         </motion.div>
         <div className="pointer-events-none absolute inset-0 grid place-content-center text-center">
           <span className="text-xs text-muted">Total de receitas</span>
-          <strong className="serif max-w-36 break-all text-3xl">{moeda(saldos.receitas)}</strong>
+          <strong className="forte max-w-36 break-all text-2xl">{moeda(saldos.receitas)}</strong>
         </div>
       </div></LimiteGrafico> : <p className="text-muted">
         {distribuicao.estado === 'negativo'
@@ -50,7 +50,7 @@ export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
       </p>}
       <ul aria-label="Legenda da distribuição" className="grid gap-1">{distribuicao.segmentos.map(s => <li key={s.id} className="legenda-item">
         <span className="break-words"><span className="ponto" style={{ background: s.cor, color: s.cor }} aria-hidden/>{s.nome}</span>
-        <span className="break-all">{'percentual' in s && <><b className="serif text-2xl font-normal">{s.percentual}</b> · </>}<span className="num text-soft">{moeda(s.valor)}</span></span></li>)}</ul>
+        <span className="break-all">{'percentual' in s && <><b className="forte text-lg">{s.percentual}</b> · </>}<span className="num text-soft">{moeda(s.valor)}</span></span></li>)}</ul>
     </div>}
   </Painel>
 }

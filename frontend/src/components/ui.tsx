@@ -15,11 +15,11 @@ export const painel = 'glass min-w-0 rounded-[26px] p-6'
 
 const suave = [0.16, 1, 0.3, 1] as const
 
-// Rótulo de seção (mono, caixa alta) + título do card em serifa.
+// Rótulo de seção + título do card.
 export function Secao({ n, rotulo, titulo }: { n: string; rotulo: string; titulo: string }) {
   return <div className="mb-5"><p className="rotulo-secao">{n} — {rotulo}</p><h2 className="titulo-card">{titulo}</h2></div>
 }
-// Cabeçalho de página: título grande em serifa; à direita, ações ou abas.
+// Cabeçalho de página: título; à direita, ações ou abas.
 export function Cabecalho({ titulo, children }: { titulo: string; children?: ReactNode }) {
   return <Entrada className="cabecalho"><h1 className="titulo-pagina">{titulo}</h1>{children && <div className="flex flex-wrap gap-3">{children}</div>}</Entrada>
 }
@@ -44,7 +44,7 @@ export function Dialogo({ titulo, aberto, onOpenChange, children }: {
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: reduz ? 0 : 0.35, ease: suave }, transitionEnd: { filter: 'none' } }}
           exit={reduz ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.18, ease: 'easeIn' } }}>
           <div className="mb-6 flex items-start justify-between gap-4">
-            <DialogPrimitive.Title className="serif text-[34px] leading-tight">{titulo}</DialogPrimitive.Title>
+            <DialogPrimitive.Title className="text-[20px] font-semibold leading-tight tracking-[-0.02em]">{titulo}</DialogPrimitive.Title>
             <DialogPrimitive.Close className="grid size-10 shrink-0 place-items-center rounded-full border border-line bg-[rgba(15,23,42,.04)] text-soft hover:bg-track hover:text-text" aria-label="Fechar diálogo"><X size={18}/></DialogPrimitive.Close>
           </div>
           <DialogPrimitive.Description className="sr-only">Formulário de {titulo.toLowerCase()}</DialogPrimitive.Description>

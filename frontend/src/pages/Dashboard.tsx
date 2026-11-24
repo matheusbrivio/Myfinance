@@ -22,10 +22,10 @@ const kpis = [
 ] as const
 const mesAno = () => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date()).replace(' de ', ' ')
 
-// Saldo enorme em serifa; os centavos ficam mais apagados.
+// Saldo grande; os centavos ficam em --text-muted.
 function Saldo({ texto }: { texto: string }) {
   const i = texto.lastIndexOf(',')
-  return <span className="serif saldo"><Numero texto={texto.slice(0, i)}/><span className="centavos"><Numero texto={texto.slice(i)}/></span></span>
+  return <span className="saldo"><Numero texto={texto.slice(0, i)}/><span className="centavos"><Numero texto={texto.slice(i)}/></span></span>
 }
 
 export function Dashboard() {
@@ -50,7 +50,7 @@ export function Dashboard() {
       </div>
       <div className="glass patrimonio">
         <p className="rotulo-secao">Patrimônio total controlado</p>
-        <p className="serif mt-2 break-all text-4xl"><Numero texto={moeda(resumo.saldos.patrimonio)}/></p>
+        <p className="forte mt-2 break-all text-3xl"><Numero texto={moeda(resumo.saldos.patrimonio)}/></p>
       </div>
     </section></Entrada>
     {vazio && <Entrada><Painel className="vazio-dashboard">
@@ -77,7 +77,7 @@ export function Dashboard() {
         {resumo.metas.length ? <ul className="grid gap-6">{resumo.metas.map((m, i) => <li key={m.id}>
           <div className="flex items-baseline justify-between gap-4">
             <Link to={'/metas/' + m.id} className="break-words text-soft hover:text-text">{m.nome}</Link>
-            <strong className="serif text-4xl font-normal text-accent">{m.progresso.percentual.replace('.', ',')}%</strong>
+            <strong className="forte text-2xl text-accent">{m.progresso.percentual.replace('.', ',')}%</strong>
           </div>
           <div className="trilho trilho-fino" role="progressbar" aria-label={'Progresso de ' + m.nome} aria-valuenow={Number(m.progresso.barra)} aria-valuemin={0} aria-valuemax={100}>
             <Barra className="barra-ambar" largura={Number(m.progresso.barra)} atraso={i * 0.1}/>

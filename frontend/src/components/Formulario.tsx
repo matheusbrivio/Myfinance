@@ -13,7 +13,7 @@ export type Campo = {
   opcoes?: { valor: string; rotulo: string }[]
   /** Ocupa meia linha (ex.: Data e Categoria lado a lado). */
   meia?: boolean
-  /** Valor em destaque: serifa grande, só com linha embaixo. */
+  /** Valor em destaque: número grande, só com linha embaixo. */
   destaque?: boolean
 }
 const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
@@ -156,8 +156,8 @@ export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', su
         return <div key={c.nome} className={'min-w-0 ' + (c.meia ? '' : 'sm:col-span-2')}>
           {c.tipo === 'segmento' ? <Segmento c={c} valor={comum.value} mudar={mudar} invalido={!!erro} descricao={descricao}/> :
           c.destaque ? <>{rotulo}<div className="valor-destaque" style={{ '--cor-valor': corValor } as CSSProperties}>
-            <span className="serif text-muted" aria-hidden>R$</span>
-            <input {...comum} className="valor-input serif" inputMode="decimal" placeholder="0,00" autoComplete="off" onChange={e => mudar(e.target.value)}/>
+            <span className="text-muted" aria-hidden>R$</span>
+            <input {...comum} className="valor-input forte" inputMode="decimal" placeholder="0,00" autoComplete="off" onChange={e => mudar(e.target.value)}/>
           </div></> : <>{rotulo}
           {c.tipo === 'select' ? <select {...comum} onChange={e => mudar(e.target.value)}>
             {c.opcoes?.map(o => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}

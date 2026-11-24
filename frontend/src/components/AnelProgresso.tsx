@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react'
 
-// Anel de progresso âmbar de 128px com o percentual em serifa no centro; cresce do zero.
+// Anel de progresso âmbar com o percentual no centro; cresce do zero.
 export function AnelProgresso({ valor, texto, rotulo, atraso = 0 }: { valor: number; texto: string; rotulo: string; atraso?: number }) {
   const reduz = useReducedMotion()
   const raio = 56
@@ -14,6 +14,6 @@ export function AnelProgresso({ valor, texto, rotulo, atraso = 0 }: { valor: num
         initial={{ strokeDashoffset: reduz ? volta * (1 - fracao) : volta }} animate={{ strokeDashoffset: volta * (1 - fracao) }}
         transition={{ duration: reduz ? 0 : 1.4, ease: [0.16, 1, 0.3, 1], delay: atraso }}/>}
     </svg>
-    <span className="serif absolute inset-0 grid place-items-center text-[34px] leading-none text-text">{texto}</span>
+    <span className="forte absolute inset-0 grid place-items-center text-[26px] leading-none text-text">{texto}</span>
   </div>
 }
