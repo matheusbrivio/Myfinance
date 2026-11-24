@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Link, Route, Routes } from 'react-router'
-import { Avisos } from './components/ui'
+import { Avisos, Cabecalho, Painel } from './components/ui'
 import { Layout } from './layouts/Layout'
 import { Dashboard } from './pages/Dashboard'
 import { Categorias, Transacoes } from './pages/Registros'
@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(<StrictMode>
       <Route path="transacoes" element={<Transacoes/>}/>
       <Route path="metas" element={<Metas/>}/>
       <Route path="metas/:id" element={<DetalheMeta/>}/>
-      <Route path="*" element={<p>Esta página não existe. <Link className="text-accent" to="/">Ir para a visão geral</Link></p>}/>
+      <Route path="*" element={<><Cabecalho titulo="Página indisponível"/><Painel><p>Esta página não existe. <Link className="text-accent underline" to="/">Ir para o Dashboard</Link></p></Painel></>}/>
     </Route>
   </Routes></Avisos></BrowserRouter>
 </StrictMode>)

@@ -13,3 +13,10 @@ export function valorAPI(valor: string) {
 }
 export const tipos = { receita: 'Receita', despesa: 'Despesa', aporte_meta: 'Aporte para meta', retirada_meta: 'Retirada da meta' }
 export const instanteBR = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' })
+// Soma valores decimais da API ("123.45") em centavos inteiros, sem erro de ponto flutuante.
+export function somar(valores: string[]) {
+  const total = valores.reduce((t, v) => t + BigInt(v.replace('.', '')), 0n)
+  const negativo = total < 0n
+  const texto = (negativo ? -total : total).toString().padStart(3, '0')
+  return (negativo ? '-' : '') + texto.slice(0, -2) + '.' + texto.slice(-2)
+}

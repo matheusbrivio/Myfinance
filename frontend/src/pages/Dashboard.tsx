@@ -28,13 +28,14 @@ export function Dashboard() {
   const { versao } = useAtualizacao()
   const q = useQuery('dashboard#' + versao, signal => api<Resumo>('resumo/', { signal }))
   const g = useQuery('graficos#' + versao, async signal => (await api<Graficos>('graficos/', { signal })) ?? null)
-  if (!q.data) return <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/>
+  if (!q.data) return <><h1 className="sr-only">Dashboard</h1><Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/></>
   const resumo = q.data
   const distribuicao = distribuirDinheiro(resumo.saldos)
   const livre = distribuicao.estado === 'valido' ? distribuicao.segmentos[0].percentual : null
   const despesas = g.data?.despesas_por_categoria ?? []
   const vazio = distribuicao.estado === 'vazio'
   return <div className="space-y-6">
+    <h1 className="sr-only">Dashboard</h1>
     <Entrada><section className="hero">
       <div>
         <h2 className="rotulo-hero">Saldo disponível<span> · {mesAno()}</span></h2>

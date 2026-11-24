@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { PilulaAtiva } from '../components/Abas'
-import { Entrada } from '../components/Entrada'
 import { FundoLiquido } from '../components/FundoLiquido'
 import { useQuery } from '../hooks/useQuery'
 import { todas } from '../services/api'
@@ -19,7 +18,6 @@ const paginas = [
 ]
 export function Layout() {
   const { pathname } = useLocation()
-  const pagina = paginas.find(p => p.caminho === pathname || (p.caminho !== '/' && pathname.startsWith(p.caminho + '/')))
   const cats = useQuery('categorias', signal => todas<Categoria>('categorias/', signal))
   const [nova, setNova] = useState(false)
   const [versao, setVersao] = useState(0)
@@ -40,7 +38,6 @@ export function Layout() {
           <button type="button" className="cta" disabled={!cats.data} onClick={() => setNova(true)}>Nova transação <Plus size={18} aria-hidden/></button>
         </header>
         <main key={pathname} id="principal" className="pagina">
-          <Entrada className={'titulo-pagina' + (pathname === '/' ? ' sr-only' : '')}><h1>{pagina?.titulo ?? 'Página indisponível'}</h1></Entrada>
           <Outlet/>
         </main>
       </div>

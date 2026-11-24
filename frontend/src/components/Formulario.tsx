@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { ErroAPI, api } from '../services/api'
 import { dataBR, dataISO, valorAPI } from '../services/format'
 import { botao, campo, useAviso } from './ui'
@@ -39,9 +39,9 @@ export function Calendario({ id, valor, mudar, invalido, obrigatorio }: { id: st
     </div>}
   </>
 }
-export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', sucesso, concluir }: {
+export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', sucesso, concluir, resumo, cancelar }: {
   campos: Campo[]; inicial?: Record<string, string>; endpoint: string; method?: 'POST' | 'PATCH' | 'DELETE'
-  sucesso: string; concluir: () => void
+  sucesso: string; concluir: () => void; resumo?: ReactNode; cancelar?: () => void
 }) {
   const [dados, setDados] = useState(() => Object.fromEntries(Object.entries(inicial).map(([nome, valor]) => {
     const tipo = campos.find(c => c.nome === nome)?.tipo
@@ -92,7 +92,7 @@ export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', su
   }
   return <form onSubmit={enviar} className={'space-y-4' + (treme ? ' treme' : '')} aria-busy={enviando}>
     {erroGeral && <p role="alert" className="text-sm text-bad">{erroGeral}</p>}
-    {method === 'DELETE' && <p>Confirma esta operação?</p>}
+    {method === 'DELETE' && (resumo ?? <p>Confirma esta operação?</p>)}
     <fieldset disabled={enviando} className="space-y-4">
       {campos.map(c => {
         const id = 'campo-' + c.nome
