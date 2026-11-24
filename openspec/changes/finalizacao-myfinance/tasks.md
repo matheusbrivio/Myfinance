@@ -19,15 +19,15 @@
 
 ## 5. Exportar CSV e busca rápida
 
-- [ ] 5.1 Implementar `GET /api/v1/transacoes/exportar/` com os filtros da listagem e o filtro `busca`; botão "Exportar CSV" e paleta de comandos Ctrl+K com ações, navegação e busca de transações. Testar conteúdo e formato do CSV, o filtro `busca` e a paleta no navegador.
+- [x] 5.1 Implementar `GET /api/v1/transacoes/exportar/` com os filtros da listagem e o filtro `busca`; botão "Exportar CSV" e paleta de comandos Ctrl+K com ações, navegação e busca de transações. Testar conteúdo e formato do CSV, o filtro `busca` e a paleta no navegador.
 
 ## 6. Acabamento
 
-- [ ] 6.1 Meta concluída com confete único e aviso; esqueletos de carregamento; erro e 404 no mesmo estilo; estados vazios com ação; revisão da grade em 1440, 1024 e 390 px.
+- [ ] 6.1 (Pendente: adiado para depois da apresentação.) Meta concluída com confete único e aviso; esqueletos de carregamento; erro e 404 no mesmo estilo; estados vazios com ação; revisão da grade em 1440, 1024 e 390 px.
 
 ## 7. Acesso pelo celular
 
-- [ ] 7.1 Hosts extras por `MYFINANCE_HOSTS` sem afrouxar o padrão, manifest com ícones, `theme-color` e `apple-touch-icon` servidos pelo Django, e documentação no README.
+- [ ] 7.1 (Pendente: adiado para depois da apresentação.) Hosts extras por `MYFINANCE_HOSTS` sem afrouxar o padrão, manifest com ícones, `theme-color` e `apple-touch-icon` servidos pelo Django, e documentação no README.
 
 ## 8. Fechamento
 

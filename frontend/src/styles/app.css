@@ -327,3 +327,20 @@ select.campo option { background: #fff; color: var(--text); }
 .insight-positivo { color: var(--income); background: rgba(5, 150, 105, .12); }
 .insight-alerta { color: var(--goal-text); background: rgba(217, 119, 6, .14); }
 .insight-neutro { color: var(--text-soft); background: var(--track); }
+
+/* Paleta de comandos (Ctrl+K) e botão Buscar da barra */
+.glass-strong { background: rgba(255, 255, 255, .9); --vidro: blur(28px) saturate(180%); backdrop-filter: var(--vidro);
+  border: 1px solid rgba(255, 255, 255, .8); box-shadow: 0 30px 60px -24px rgba(15, 23, 42, .35); }
+.paleta-entrada { width: 100%; height: 52px; background: transparent; border: 0; outline: none; font-size: 15px; color: var(--text); }
+.paleta-entrada::placeholder { color: var(--text-muted); }
+.paleta-lista { max-height: min(60vh, 420px); overflow-y: auto; padding: 6px; }
+.paleta [cmdk-group-heading] { padding: 10px 10px 4px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.paleta [cmdk-item] { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border-radius: 10px; font-size: 14px; cursor: pointer; }
+.paleta [cmdk-item][data-selected="true"] { background: var(--track); }
+.botao-buscar { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 999px; background: var(--track);
+  color: var(--text-soft); font-size: 14px; font-weight: 500; }
+.botao-buscar:hover { color: var(--text); }
+.botao-buscar-tecla { font-family: var(--font-sans); font-size: 11px; padding: 1px 6px; border-radius: 6px; background: var(--pill); color: var(--text-muted); }
+@media (max-width: 1100px) { .botao-buscar-tecla { display: none; } }
+@media (max-width: 768px) { .botao-buscar { width: 40px; padding: 0; justify-content: center; } .botao-buscar-texto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } }
+.paleta-campo:focus-within { box-shadow: inset 0 -2px 0 var(--focus); }

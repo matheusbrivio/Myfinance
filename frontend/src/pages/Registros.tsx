@@ -1,6 +1,7 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Download, Pencil, Plus, Trash2 } from 'lucide-react'
+import { urlExportar } from '../components/PaletaComandos'
 import { Formulario, Calendario, type Campo } from '../components/Formulario'
 import { Abas } from '../components/Abas'
 import { Entrada } from '../components/Entrada'
@@ -19,7 +20,13 @@ const nomes = [{ nome: 'nome', rotulo: 'Nome', obrigatorio: true }, { nome: 'des
 
 export function Categorias() {
   const q = useQuery('categorias', signal => todas<Categoria>('categorias/', signal))
+  // ?nova=1 (vindo da paleta de comandos) abre o modal de nova categoria.
+  const [params, setParams] = useSearchParams()
   const [edicao, setEdicao] = useState<Edicao<Categoria>>()
+  // Reage à URL (também com a página já aberta): abre o modal e limpa o parâmetro.
+  useEffect(() => {
+    if (params.get('nova') === '1') { setEdicao({ modo: 'novo' }); setParams({}, { replace: true }) }
+  }, [params, setParams])
   const titulo = edicao?.modo === 'editar' ? 'Editar categoria' : edicao?.modo === 'excluir' ? 'Excluir categoria' : 'Nova categoria'
   return <>
     <Cabecalho titulo="Categorias" subtitulo="Agrupe as transações pelo tipo de gasto ou de receita.">
@@ -138,6 +145,11 @@ export function Transacoes() {
   </>
 }
 
+function filtrosExportacao(params: URLSearchParams) {
+  const filtros = new URLSearchParams(params)
+  filtros.delete('pagina')
+  return filtros.toString()
+}
 const dataCompleta = (v: string) => v === '' || /^\d{2}\/\d{2}\/\d{4}$/.test(v)
 // Barra de ferramentas única: abas à esquerda; categoria, datas e "Limpar" à direita.
 // Os filtros se aplicam ao mudar (datas, quando completas). "Aplicar" continua, pequeno, para quem
@@ -169,6 +181,8 @@ function Filtros({ params, opcoes, aplicar, limpar }: {
       <div className="w-44"><Calendario id="fim" valor={fim} mudar={mudarData('data_fim', setFim)} compacto/></div>
       <button className={botaoTexto + ' h-8 border border-line px-2.5 text-xs'} aria-label="Aplicar filtros">Aplicar</button>
       <button type="button" className={botaoTexto} aria-label="Limpar filtros" onClick={() => { setInicio(''); setFim(''); limpar() }}>Limpar</button>
+      {/* Mesmos filtros da lista (menos a página). */}
+      <a className={botaoTexto} href={urlExportar(filtrosExportacao(params))} download><Download size={16} aria-hidden/>Exportar CSV</a>
     </div>
   </form>
 }

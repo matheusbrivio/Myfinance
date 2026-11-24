@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Plus, Tags } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ChartNoAxesCombined, Goal, LayoutDashboard, List, Plus, Search, Tags } from 'lucide-react'
+import { PaletaComandos, atalho } from '../components/PaletaComandos'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { motion } from 'motion/react'
 import { PilulaAtiva } from '../components/Abas'
@@ -26,6 +27,15 @@ export function Layout() {
   const cats = useUltimo(useQuery('categorias#' + aberturas, signal => todas<Categoria>('categorias/', signal)).data)
   const opcoes = (cats ?? []).map(c => ({ valor: String(c.id), rotulo: c.nome }))
   const abrirNovaTransacao = () => { setAberturas(n => n + 1); setNova(true) }
+  // Paleta de comandos: Ctrl+K (⌘K no Mac) em qualquer página do app.
+  const [paleta, setPaleta] = useState(false)
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPaleta(a => !a) }
+    }
+    window.addEventListener('keydown', tecla)
+    return () => window.removeEventListener('keydown', tecla)
+  }, [])
   const recarregar = () => setVersao(v => v + 1)
   return <AtualizacaoContext.Provider value={{ versao, abrirNovaTransacao, recarregar }}>
     <div className="min-h-screen">
@@ -42,14 +52,20 @@ export function Layout() {
                   <span className="pilula-texto menu-rotulo"><Icone className="menu-icone" size={18} aria-hidden/>{titulo}</span></>}
               </NavLink>)}
             </nav>
+            <div className="flex items-center gap-2">
+            <button type="button" className="botao-buscar" onClick={() => setPaleta(true)} aria-keyshortcuts="Control+K Meta+K">
+              <Search size={16} aria-hidden/><span className="botao-buscar-texto">Buscar</span><kbd className="botao-buscar-tecla" aria-hidden>{atalho}</kbd>
+            </button>
             <button type="button" className="cta" onClick={abrirNovaTransacao}>
               <span className="cta-texto">Nova transação</span><Plus size={18} aria-hidden/></button>
+            </div>
           </header>
         </div>
         <motion.main key={pathname} id="principal" className="container-app pagina" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
           <Outlet/>
         </motion.main>
       </div>
+      <PaletaComandos aberta={paleta} mudar={setPaleta} novaTransacao={abrirNovaTransacao}/>
       <EdicaoRegistro edicao={nova ? { modo: 'novo' } : undefined} titulo="Nova transação" campos={camposTransacao(opcoes)}
         recurso="transacoes" fechar={() => setNova(false)} recarregar={() => setVersao(v => v + 1)}/>
     </div>

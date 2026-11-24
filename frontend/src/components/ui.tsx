@@ -94,6 +94,8 @@ export function Avisos({ children }: { children: ReactNode }) {
       {children}
       {avisos.map(aviso => <Toast.Root key={aviso.id} asChild forceMount open={!aviso.saindo}
         duration={aviso.tipo === 'erro' ? Infinity : 4000}
+        // Com um diálogo aberto (modal ou paleta), o Esc é dele: o toast não consome a tecla.
+        onEscapeKeyDown={e => { if (document.querySelector('[role="dialog"]')) e.preventDefault() }}
         onOpenChange={aberto => {
           if (aberto) return
           setAvisos(v => v.map(a => a.id === aviso.id ? { ...a, saindo: true } : a))

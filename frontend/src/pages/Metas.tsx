@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { CardMeta } from '../components/CardMeta'
@@ -19,7 +19,13 @@ const campos: Campo[] = [
 ]
 export function Metas() {
   const q = useQuery('metas', signal => todas<Meta>('metas/', signal))
+  // ?nova=1 (vindo da paleta de comandos) abre o modal de nova meta.
+  const [params, setParams] = useSearchParams()
   const [nova, setNova] = useState(false)
+  // Reage à URL (também com a página já aberta): abre o modal e limpa o parâmetro.
+  useEffect(() => {
+    if (params.get('nova') === '1') { setNova(true); setParams({}, { replace: true }) }
+  }, [params, setParams])
   return <>
     <Cabecalho titulo="Metas" subtitulo="Quanto já foi guardado para cada objetivo."><button className={primario} onClick={() => setNova(true)}><Plus size={16} aria-hidden/>Nova meta</button></Cabecalho>
     {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/> : <>

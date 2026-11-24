@@ -1,4 +1,7 @@
+import csv
+
 from django.db import transaction
+from django.http import HttpResponse
 from django.db.models.deletion import ProtectedError
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -146,6 +149,8 @@ class Transacoes(Recurso):
         for entrada, lookup in (("tipo", "tipo"), ("data_inicio", "data__gte"), ("data_fim", "data__lte")):
             if entrada in dados:
                 queryset = queryset.filter(**{lookup: dados[entrada]})
+        if dados.get("busca"):
+            queryset = queryset.filter(descricao__icontains=dados["busca"])
         return queryset, dados["pagina"]
 
 
@@ -266,3 +271,29 @@ class Insights(JSONView):
     def get(self, request):
         periodo = mensal.periodo_da_requisicao(request) or regras_insights.mes_atual()
         return Response(regras_insights.insights(*periodo))
+
+
+def celula(texto):
+    """Texto seguro para planilha: sem o apóstrofo, o Excel executaria "=...", "+...", "-...", "@..." como fórmula."""
+    return "'" + texto if texto[:1] in ("=", "+", "-", "@", "\t", "\r") else texto
+
+
+class ExportarTransacoes(Transacoes):
+    """CSV das transações com os mesmos filtros da listagem, pronto para o Excel em português."""
+    # Só leitura: herda os filtros de Transacoes, não a escrita.
+    http_method_names = ["get", "head", "options"]
+
+    def get(self, request, pk=None):
+        queryset, _ = self.filtros(request)
+        resposta = HttpResponse(content_type="text/csv; charset=utf-8")
+        resposta["Content-Disposition"] = f'attachment; filename="myfinance-transacoes-{mensal.hoje().isoformat()}.csv"'
+        resposta.write("\ufeff")  # BOM: o Excel reconhece o UTF-8 e os acentos.
+        escritor = csv.writer(resposta, delimiter=";", lineterminator="\r\n")
+        escritor.writerow(["Data", "Tipo", "Descrição", "Categoria", "Valor"])
+        tipos = dict(Transacao.Tipo.choices)
+        for t in queryset:
+            escritor.writerow([
+                t.data.strftime("%d/%m/%Y"), tipos[t.tipo], celula(t.descricao),
+                celula(t.categoria.nome) if t.categoria else "Sem categoria", format(t.valor, ".2f").replace(".", ","),
+            ])
+        return resposta
