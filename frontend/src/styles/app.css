@@ -267,12 +267,13 @@ select.campo option { background: #fff; color: var(--text); }
 /* O modal não corta o popover do calendário; só rola quando a tela é baixa demais para ele. */
 @media (max-height: 720px) { .dialogo { max-height: 92vh; overflow-y: auto; } }
 
-/* Intro: tela cheia, sem rolagem. Crachás no alto, título e botão Play embaixo. */
+/* Intro: tela cheia, sem rolagem. */
 .intro { position: relative; height: 100svh; overflow: hidden; }
-.intro-conteudo { position: relative; z-index: 1; display: flex; height: 100%; flex-direction: column; }
-.intro-crachas { display: grid; height: 70svh; flex: none; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.intro-coluna { position: relative; min-width: 0; height: 100%; }
-.intro-texto { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 16px 24px; text-align: center; }
+.intro-conteudo { position: relative; z-index: 1; height: 100%; }
+/* Os três Lanyards ficam empilhados cobrindo a tela inteira. */
+.intro-crachas { position: absolute; inset: 0; }
+.intro-lanyard { position: absolute !important; inset: 0; }
+.intro-texto { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 16px 40px; text-align: center; }
 .intro-rotulo { font-size: 13px; font-weight: 500; color: var(--text-soft); }
 .intro-titulo { font-size: clamp(44px, 6vw, 72px); font-weight: 600; line-height: 1; letter-spacing: -.045em; }
 .intro-subtitulo { font-size: 16px; color: var(--text-soft); }
@@ -281,11 +282,13 @@ select.campo option { background: #fff; color: var(--text); }
   background: var(--ink); color: #fff; padding-left: 5px; box-shadow: 0 14px 30px -14px rgba(15, 23, 42, .6); }
 .botao-play:disabled { cursor: default; }
 .play-anel { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--ink); pointer-events: none; }
-/* Fallback sem WebGL ou com reduced-motion: as frentes paradas, levemente giradas, penduradas por uma faixa escura. */
-.intro-estatico { display: flex; height: 100%; flex-direction: column; align-items: center; transform: rotate(var(--giro)); transform-origin: top center; }
-.intro-fita { width: 14px; flex: 0 0 14%; background: #0F172A; border-radius: 0 0 2px 2px; }
-.intro-estatico img { width: auto; max-width: 86%; height: auto; max-height: 82%; border-radius: 14px; box-shadow: 0 18px 40px -18px rgba(15, 23, 42, .45); }
-@media (max-width: 767px) {
-  .intro-crachas { height: 62svh; }
-  .intro-titulo { font-size: 44px; }
-}
+/* Fallback (celular, reduced-motion ou sem WebGL): as 3 frentes em leque sobrepostas, cada uma pendurada pela fita. */
+.intro-leque { position: relative; display: flex; height: 60svh; align-items: flex-start; justify-content: center; }
+.intro-estatico { position: relative; display: flex; width: min(38vw, 260px, 30svh); height: 100%; flex-direction: column; align-items: center;
+  transform: rotate(var(--giro)); transform-origin: top center; }
+.intro-estatico-left, .intro-estatico-right { z-index: 0; margin-top: 2svh; }
+.intro-estatico-left { margin-right: -7%; }
+.intro-estatico-right { margin-left: -7%; }
+.intro-estatico-center { z-index: 1; }
+.intro-fita { width: 14px; flex: 0 0 22%; background: #0F172A; border-radius: 0 0 2px 2px; }
+.intro-estatico img { width: 100%; height: auto; border-radius: 14px; box-shadow: 0 18px 40px -18px rgba(15, 23, 42, .45); }

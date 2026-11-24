@@ -45,8 +45,13 @@ export interface LanyardProps {
   intro?: boolean;
   className?: string;
   style?: CSSProperties;
+  /** Avisa quando o ponteiro passa sobre o cartão (e se está arrastando), para o cursor ir no contêiner. */
+  onHoverChange?: (hovering: boolean, grabbing: boolean) => void;
+  /** Recebe o pointerdown antes dos outros Lanyards empilhados (ganha quando os cartões se sobrepõem). */
+  priority?: boolean;
 }
-type Settings = Required<Omit<LanyardProps, 'frontImage' | 'backImage' | 'strapImage' | 'className' | 'style'>> &
+type ClaimablePointerEvent = PointerEvent & { lanyardClaimed?: boolean };
+type Settings = Required<Omit<LanyardProps, 'frontImage' | 'backImage' | 'strapImage' | 'className' | 'style' | 'onHoverChange' | 'priority'>> &
   Pick<LanyardProps, 'frontImage' | 'backImage' | 'strapImage'>;
 
 const CARD_SIZES: Record<Orientation, [number, number]> = {
@@ -767,11 +772,15 @@ const Lanyard = ({
   interactive = true,
   intro = true,
   className = '',
-  style
+  style,
+  onHoverChange,
+  priority = false
 }: LanyardProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<Settings>(null!);
   const applyRef = useRef<(() => void) | null>(null);
+  const hoverRef = useRef(onHoverChange);
+  hoverRef.current = onHoverChange;
 
   settingsRef.current = {
     frontImage,
@@ -1215,8 +1224,13 @@ const Lanyard = ({
       return hits[0] || null;
     };
 
+    // O canvas tem pointer-events: none (os três Lanyards ficam empilhados em tela cheia),
+    // então o cursor é aplicado pelo contêiner, via onHoverChange.
+    let cursor = '';
     const setCursor = (value: string) => {
-      if (canvas.style.cursor !== value) canvas.style.cursor = value;
+      if (cursor === value) return;
+      cursor = value;
+      hoverRef.current?.(value !== '', value === 'grabbing');
     };
 
     const flip = (point: THREE.Vector3) => {
@@ -1231,11 +1245,14 @@ const Lanyard = ({
       body.angular.addScaledVector(up, FLIP_SPIN * direction);
     };
 
-    const onPointerDown = (event: PointerEvent) => {
+    const onPointerDown = (event: ClaimablePointerEvent) => {
       if (!settingsRef.current.interactive || event.button > 0) return;
+      // Só um Lanyard pega cada evento; controles da página (botões, links) nunca são disputados.
+      if (event.lanyardClaimed || (event.target as Element | null)?.closest?.('button, a, input, select, textarea')) return;
       toPointer(event);
       const hit = pickCard();
       if (!hit) return;
+      event.lanyardClaimed = true;
       sim.grab = {
         local: hit.point.clone().sub(sim.body.position).applyQuaternion(sim.body.quaternion.clone().invert()),
         rotation: sim.body.quaternion.clone(),
@@ -1244,7 +1261,7 @@ const Lanyard = ({
         target: hit.point.clone()
       };
       press = { x: event.clientX, y: event.clientY, time: performance.now(), point: hit.point.clone() };
-      canvas.setPointerCapture?.(event.pointerId);
+      document.body.setPointerCapture?.(event.pointerId);
       setCursor('grabbing');
       event.preventDefault();
       start();
@@ -1269,7 +1286,7 @@ const Lanyard = ({
       sim.grab = null;
       if (press && event.type === 'pointerup' && performance.now() - press.time < 450) flip(press.point);
       press = null;
-      canvas.releasePointerCapture?.(event.pointerId);
+      if (document.body.hasPointerCapture?.(event.pointerId)) document.body.releasePointerCapture(event.pointerId);
       setCursor(hovering && event.pointerType !== 'touch' ? 'grab' : '');
       start();
     };
@@ -1280,12 +1297,14 @@ const Lanyard = ({
       if (pickCard()) event.preventDefault();
     };
 
-    canvas.addEventListener('pointerdown', onPointerDown);
-    canvas.addEventListener('pointermove', onPointerMove);
-    canvas.addEventListener('pointerup', onPointerUp);
-    canvas.addEventListener('pointercancel', onPointerUp);
-    canvas.addEventListener('lostpointercapture', onPointerUp);
-    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    // Eventos na janela: os canvases empilhados não recebem ponteiro (pointer-events: none).
+    // O de prioridade escuta na fase de captura e chega primeiro ao pointerdown.
+    window.addEventListener('pointerdown', onPointerDown, { capture: priority });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    document.body.addEventListener('lostpointercapture', onPointerUp);
+    window.addEventListener('touchstart', onTouchStart, { passive: false });
 
     const resize = () => {
       view.width = Math.max(1, container.clientWidth);
@@ -1318,12 +1337,13 @@ const Lanyard = ({
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
-      canvas.removeEventListener('pointerdown', onPointerDown);
-      canvas.removeEventListener('pointermove', onPointerMove);
-      canvas.removeEventListener('pointerup', onPointerUp);
-      canvas.removeEventListener('pointercancel', onPointerUp);
-      canvas.removeEventListener('lostpointercapture', onPointerUp);
-      canvas.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('pointerdown', onPointerDown, { capture: priority });
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      document.body.removeEventListener('lostpointercapture', onPointerUp);
+      window.removeEventListener('touchstart', onTouchStart);
+      if (sim.grab) hoverRef.current?.(false, false);
       [bodyMesh, frontMesh, backMesh, ring, clampMesh, eyelet, band].forEach(mesh => mesh.geometry?.dispose());
       [frontMaterial, backMaterial, edgeMaterial, metalMaterial, bandMaterial].forEach(material => material.dispose());
       [frontTexture, backTexture, strapTexture, grain, weave].forEach(texture => texture.dispose());

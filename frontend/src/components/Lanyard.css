@@ -1,4 +1,6 @@
+/* Os Lanyards ficam empilhados em tela cheia: nenhum bloqueia o ponteiro (os eventos vêm da janela). */
 .lanyard {
+  pointer-events: none;
   position: relative;
   width: 100%;
   height: 100%;
@@ -6,6 +8,7 @@
 }
 
 .lanyard-canvas {
+  pointer-events: none;
   display: block;
   width: 100%;
   height: 100%;
