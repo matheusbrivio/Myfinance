@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { ListaTransacoes } from '../components/ListaTransacoes'
@@ -43,15 +43,22 @@ export function Acoes({ nome, editar, excluir }: { nome: string; editar: () => v
     <button type="button" className={icone + ' hover:text-bad'} aria-label={'Excluir ' + nome} title="Excluir" onClick={excluir}><Trash2 size={16} aria-hidden/></button>
   </div>
 }
-export function EdicaoRegistro<T extends {id: number}>({ edicao, campos, titulo, recurso, inicial, fechar, recarregar, resumo }: {
+export function EdicaoRegistro<T extends {id: number}>({ edicao, campos, titulo, recurso, inicial, fechar, recarregar, resumo, verbo }: {
   edicao?: Edicao<T>; campos: Campo[]; titulo: string; recurso: string; inicial?: Record<string,string>; fechar: () => void; recarregar: () => void
-  resumo?: ReactNode
+  resumo?: ReactNode; verbo?: 'excluir' | 'encerrar'
 }) {
-  if (!edicao) return null
-  const method = edicao.modo === 'excluir' ? 'DELETE' : edicao.modo === 'editar' ? 'PATCH' : 'POST'
-  return <Dialogo titulo={titulo} aberto onOpenChange={open => { if (!open) fechar() }}>
-    <Formulario campos={method === 'DELETE' ? [] : campos} inicial={inicial} method={method} resumo={resumo} cancelar={fechar}
-      endpoint={recurso + '/' + (edicao.item ? edicao.item.id + '/' : '')}
+  // Guarda a última edição para o modal poder animar a saída depois que `edicao` some.
+  const ultima = useRef(edicao)
+  if (edicao) ultima.current = edicao
+  const atual = edicao ?? ultima.current
+  const [conteudo, setConteudo] = useState<{ titulo: string; resumo?: ReactNode; inicial?: Record<string, string> }>({ titulo, resumo, inicial })
+  if (edicao && (conteudo.titulo !== titulo || conteudo.resumo !== resumo || conteudo.inicial !== inicial)) setConteudo({ titulo, resumo, inicial })
+  if (!atual) return null
+  const method = atual.modo === 'excluir' ? 'DELETE' : atual.modo === 'editar' ? 'PATCH' : 'POST'
+  return <Dialogo titulo={conteudo.titulo} aberto={!!edicao} onOpenChange={open => { if (!open) fechar() }}>
+    <Formulario campos={method === 'DELETE' ? [] : campos} inicial={conteudo.inicial} method={method} resumo={conteudo.resumo} cancelar={fechar}
+      rotuloSalvar={recurso === 'transacoes' ? 'Salvar transação' : 'Salvar'} verbo={verbo}
+      endpoint={recurso + '/' + (atual.item ? atual.item.id + '/' : '')}
       sucesso={method === 'DELETE' ? 'Operação concluída.' : 'Registro salvo.'} concluir={() => { fechar(); recarregar() }}/>
   </Dialogo>
 }

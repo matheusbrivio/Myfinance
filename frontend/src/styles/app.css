@@ -112,26 +112,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 @keyframes brilho { to { background-position: -220% 0; } }
 
 
-/* Modal open/close */
-.dialogo-fundo[data-state="open"] { animation: aparecer .2s ease-out; }
-.dialogo-fundo[data-state="closed"] { animation: sair .15s ease-in both; }
-.dialogo[data-state="open"] { animation: modal-entra .22s cubic-bezier(.2,.9,.3,1); }
-.dialogo[data-state="closed"] { animation: modal-sai .15s ease-in both; }
-@keyframes modal-entra { from { opacity: 0; scale: .96; translate: 0 8px; } }
-@keyframes modal-sai { to { opacity: 0; scale: .97; translate: 0 4px; } }
-/* Toast open/close */
-.aviso[data-state="open"] { animation: toast-entra .25s cubic-bezier(.2,.9,.3,1); }
-.aviso[data-state="closed"] { animation: toast-sai .18s ease-in both; }
-@keyframes toast-entra { from { opacity: 0; translate: 24px 0; } }
-@keyframes toast-sai { to { opacity: 0; translate: 24px 0; } }
-/* Success check */
-.check { flex: none; color: var(--color-good); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.check circle { stroke-dasharray: 63; stroke-dashoffset: 63; animation: traco .35s ease-out .05s forwards; }
-.check path { stroke-dasharray: 20; stroke-dashoffset: 20; animation: traco .25s ease-out .25s forwards; }
-@keyframes traco { to { stroke-dashoffset: 0; } }
-/* Error state shake */
-.treme, .alerta { animation: treme .32s ease-in-out; }
-@keyframes treme { 20% { translate: -6px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 3px 0; } }
 /* Accordion */
 .acordeao-gatilho { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
 .acordeao-gatilho svg { transition: rotate .25s; }
@@ -219,3 +199,25 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 .resumo-exclusao div { display: flex; justify-content: space-between; gap: 16px; }
 .resumo-exclusao dt { color: var(--text-muted); font-size: 13px; }
 .resumo-exclusao dd { text-align: right; }
+
+/* Formulário: tipo segmentado, valor em destaque */
+.segmento { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 5px; border-radius: 999px;
+  background: rgba(0, 0, 0, .3); border: 1px solid rgba(255, 255, 255, .08); }
+.segmento-item { position: relative; display: flex; align-items: center; justify-content: center; height: 42px; border-radius: 999px;
+  cursor: pointer; font-weight: 500; color: var(--text-soft); transition: color .2s; }
+.segmento-item:hover { color: var(--text); }
+.segmento-item:has(input:checked) { color: #0B0F17; }
+.segmento-item:has(input:focus-visible) { outline: 2px solid var(--available); outline-offset: 2px; }
+fieldset[aria-invalid="true"] .segmento { border-color: var(--expense); }
+.valor-destaque { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid rgba(255, 255, 255, .16); padding-bottom: 6px;
+  color: var(--cor-valor); transition: border-color .2s; }
+.valor-destaque > span { font-size: 34px; }
+.valor-destaque:focus-within { border-color: var(--cor-valor); }
+.valor-input { min-width: 0; width: 100%; background: transparent; border: 0; outline: none; color: inherit; font-size: clamp(48px, 9vw, 60px); line-height: 1.1; }
+.valor-input::placeholder { color: rgba(255, 255, 255, .22); }
+.valor-input[aria-invalid="true"] { text-decoration: underline wavy var(--expense) 1px; text-underline-offset: 10px; }
+.campo:focus-visible { outline: 2px solid var(--available); outline-offset: 1px; }
+select.campo { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
+select.campo option { background: #0b0f17; color: var(--text); }
+.check { flex: none; color: var(--income); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }

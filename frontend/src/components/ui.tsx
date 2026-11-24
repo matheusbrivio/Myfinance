@@ -1,6 +1,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import * as Toast from '@radix-ui/react-toast'
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { CircleAlert, X } from 'lucide-react'
 import { Esqueleto, MatrizLoader } from './Efeitos'
 import { Entrada } from './Entrada'
@@ -11,6 +12,8 @@ export const primario = 'botao inline-flex items-center justify-center gap-2 rou
 export const icone = 'inline-grid size-9 place-items-center rounded-full text-soft hover:bg-white/[.08] hover:text-text'
 export const campo = 'campo w-full rounded-[14px] border border-white/10 bg-black/30 px-4 h-11 text-[15px] text-text placeholder:text-muted aria-invalid:border-bad'
 export const painel = 'glass min-w-0 rounded-[26px] p-6'
+
+const suave = [0.16, 1, 0.3, 1] as const
 
 // Rótulo de seção (mono, caixa alta) + título do card em serifa.
 export function Secao({ n, rotulo, titulo }: { n: string; rotulo: string; titulo: string }) {
@@ -23,42 +26,83 @@ export function Cabecalho({ titulo, children }: { titulo: string; children?: Rea
 export function Painel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <section className={painel + ' ' + className}>{children}</section>
 }
+
+// Modal de vidro, 500px, raio 30px. Entra com scale .97 → 1 + fade + blur; sai mais rápido.
 export function Dialogo({ titulo, aberto, onOpenChange, children }: {
   titulo: string; aberto: boolean; onOpenChange: (open: boolean) => void; children: ReactNode
 }) {
+  const reduz = useReducedMotion()
   return <DialogPrimitive.Root open={aberto} onOpenChange={onOpenChange}>
-    <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="dialogo-fundo fixed inset-0 z-40 bg-black/70" />
-      <DialogPrimitive.Content className={'dialogo fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto ' + painel}>
-        <DialogPrimitive.Title className="mb-4 pr-8 text-xl font-semibold">{titulo}</DialogPrimitive.Title>
-        <DialogPrimitive.Description className="sr-only">Formulário de {titulo.toLowerCase()}</DialogPrimitive.Description>
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded p-1" aria-label="Fechar diálogo"><X size={18}/></DialogPrimitive.Close>
-        {children}
+    <AnimatePresence>{aberto && <DialogPrimitive.Portal forceMount>
+      <DialogPrimitive.Overlay asChild forceMount>
+        <motion.div className="fixed inset-0 z-40 bg-[rgba(3,5,9,.6)]"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduz ? 0 : 0.25 }}/>
+      </DialogPrimitive.Overlay>
+      <DialogPrimitive.Content asChild forceMount>
+        <motion.div className="dialogo glass glass-modal fixed inset-0 z-50 m-auto h-fit max-h-[90vh] w-[min(500px,calc(100%-2rem))] overflow-y-auto rounded-[30px] p-7"
+          initial={reduz ? { opacity: 0 } : { opacity: 0, scale: 0.97, filter: 'blur(6px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: reduz ? 0 : 0.35, ease: suave } }}
+          exit={reduz ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.18, ease: 'easeIn' } }}>
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <DialogPrimitive.Title className="serif text-[34px] leading-tight">{titulo}</DialogPrimitive.Title>
+            <DialogPrimitive.Close className="grid size-10 shrink-0 place-items-center rounded-full border border-white/12 bg-white/5 text-soft hover:bg-white/10 hover:text-text" aria-label="Fechar diálogo"><X size={18}/></DialogPrimitive.Close>
+          </div>
+          <DialogPrimitive.Description className="sr-only">Formulário de {titulo.toLowerCase()}</DialogPrimitive.Description>
+          {children}
+        </motion.div>
       </DialogPrimitive.Content>
-    </DialogPrimitive.Portal>
+    </DialogPrimitive.Portal>}</AnimatePresence>
   </DialogPrimitive.Root>
 }
-type Aviso = { id: number; texto: string; tipo: 'sucesso' | 'info' | 'erro' }
-const AvisosContext = createContext<(texto: string, tipo?: Aviso['tipo']) => void>(() => {})
+
+// Check verde desenhado (traço animado).
+function Check() {
+  const reduz = useReducedMotion()
+  const traco = (atraso: number, duracao: number) => reduz ? {} : {
+    initial: { pathLength: 0 }, animate: { pathLength: 1 }, transition: { delay: atraso, duration: duracao, ease: 'easeOut' as const },
+  }
+  return <svg className="check" viewBox="0 0 24 24" width="26" height="26" aria-hidden>
+    <motion.circle cx="12" cy="12" r="10" {...traco(0.05, 0.35)}/>
+    <motion.path d="M7.5 12.5l3 3 6-6.5" {...traco(0.3, 0.25)}/>
+  </svg>
+}
+
+type Aviso = { id: number; texto: string; tipo: 'sucesso' | 'info' | 'erro'; detalhe?: string; saindo?: boolean }
+type Avisar = (texto: string, tipo?: Aviso['tipo'], detalhe?: string) => void
+const AvisosContext = createContext<Avisar>(() => {})
 export const useAviso = () => useContext(AvisosContext)
+// Toast de vidro no canto inferior direito: sobe + fade; sai em 180 ms depois de 4 s.
 export function Avisos({ children }: { children: ReactNode }) {
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const id = useRef(0)
-  return <AvisosContext.Provider value={(texto, tipo = 'sucesso') => {
-    const novo = { id: ++id.current, texto, tipo }
+  const reduz = useReducedMotion()
+  const avisar: Avisar = (texto, tipo = 'sucesso', detalhe) => {
+    const novo = { id: ++id.current, texto, tipo, detalhe }
     setAvisos(atuais => [...atuais, novo])
-  }}>
+  }
+  return <AvisosContext.Provider value={avisar}>
     <Toast.Provider duration={4000} swipeDirection="right">
       {children}
-      {avisos.map(aviso => <Toast.Root key={aviso.id} className={'aviso flex items-center gap-3 ' + painel}
+      {avisos.map(aviso => <Toast.Root key={aviso.id} asChild forceMount open={!aviso.saindo}
         duration={aviso.tipo === 'erro' ? Infinity : 4000}
-        onOpenChange={aberto => { if (!aberto) window.setTimeout(() => setAvisos(v => v.filter(a => a.id !== aviso.id)), 180) }}>
-        {aviso.tipo === 'sucesso' ? <svg className="check" viewBox="0 0 24 24" width="22" height="22" aria-hidden><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
-          : aviso.tipo === 'erro' ? <CircleAlert className="alerta text-bad" size={22} aria-hidden/> : null}
-        <Toast.Description className={aviso.tipo === 'erro' ? 'text-bad' : 'text-slate-100'}>{aviso.texto}</Toast.Description>
-        <Toast.Close aria-label="Fechar notificação" className="ml-auto p-1"><X size={16}/></Toast.Close>
+        onOpenChange={aberto => {
+          if (aberto) return
+          setAvisos(v => v.map(a => a.id === aviso.id ? { ...a, saindo: true } : a))
+          window.setTimeout(() => setAvisos(v => v.filter(a => a.id !== aviso.id)), 180)
+        }}>
+        <motion.li className="aviso glass flex items-start gap-3 rounded-[22px] p-4 pr-3"
+          initial={reduz ? false : { opacity: 0, y: 16 }}
+          animate={aviso.saindo ? { opacity: 0, y: reduz ? 0 : 8 } : { opacity: 1, y: 0 }}
+          transition={{ duration: reduz ? 0 : aviso.saindo ? 0.18 : 0.35, ease: suave }}>
+          {aviso.tipo === 'sucesso' ? <Check/> : aviso.tipo === 'erro' ? <CircleAlert className="mt-0.5 shrink-0 text-bad" size={24} aria-hidden/> : null}
+          <div className="min-w-0 flex-1">
+            <Toast.Title className={'font-medium ' + (aviso.tipo === 'erro' ? 'text-bad' : 'text-text')}>{aviso.texto}</Toast.Title>
+            {aviso.detalhe && <Toast.Description className="num mt-0.5 break-words text-sm text-muted">{aviso.detalhe}</Toast.Description>}
+          </div>
+          <Toast.Close aria-label="Fechar notificação" className={icone + ' size-8 shrink-0'}><X size={16}/></Toast.Close>
+        </motion.li>
       </Toast.Root>)}
-      <Toast.Viewport label="Notificações" className="fixed bottom-4 right-4 z-[60] grid w-[min(22rem,calc(100%-2rem))] gap-2" />
+      <Toast.Viewport label="Notificações" className="fixed bottom-5 right-5 z-[60] grid w-[min(24rem,calc(100%-2.5rem))] gap-2" />
     </Toast.Provider>
   </AvisosContext.Provider>
 }

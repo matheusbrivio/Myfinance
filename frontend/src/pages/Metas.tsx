@@ -73,7 +73,8 @@ export function DetalheMeta() {
     <EdicaoRegistro edicao={edicao ? { modo: edicao, item: meta } : undefined}
       titulo={edicao === 'editar' ? 'Editar meta' : historico.length ? 'Encerrar meta' : 'Excluir meta'}
       campos={campos} inicial={{nome:meta.nome, descricao:meta.descricao, objetivo:meta.objetivo, prazo:meta.prazo}}
-      recurso="metas" fechar={() => setEdicao(undefined)} recarregar={() => edicao === 'excluir' ? navigate('/metas') : q.reload()}/>
+      recurso="metas" verbo={historico.length ? 'encerrar' : 'excluir'}
+      fechar={() => setEdicao(undefined)} recarregar={() => edicao === 'excluir' ? navigate('/metas') : q.reload()}/>
     {(aporte || retirada) && <Dialogo titulo={aporte ? 'Fazer aporte' : 'Fazer retirada'} aberto onOpenChange={open => {if (!open) setParams({})}}>
       <Formulario key={acao} campos={[{nome:'valor', rotulo:'Valor', tipo:'moeda', obrigatorio:true}]} cancelar={() => setParams({})}
         endpoint={endpoint + (aporte ? 'aportes/' : 'retiradas/')} sucesso="Movimentação registrada."
