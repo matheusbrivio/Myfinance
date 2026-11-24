@@ -4,6 +4,7 @@ import { moeda } from '../services/format'
 import { useQuery } from '../hooks/useQuery'
 import { useAtualizacao } from '../layouts/contexto'
 import { BarrasCategoria } from '../components/BarrasCategoria'
+import { PicoDeGastos } from '../components/PicoDeGastos'
 import { ListaTransacoes } from '../components/ListaTransacoes'
 import { Rosca } from '../components/Rosca'
 import { Estado, Painel, Secao } from '../components/ui'
@@ -61,9 +62,14 @@ export function Dashboard() {
       <h2 className="rotulo-secao flex items-center gap-2"><span className="ponto" style={{ background: cor, color: cor }} aria-hidden/>{titulo}</h2>
       <p className="num mt-3 break-all text-2xl font-medium" style={{ color: cor }}><Numero texto={moeda(resumo.saldos[id])}/></p>
     </Painel>)}</Entrada>
-    <Entrada trigger="scroll" className="grid items-start gap-6 lg:grid-cols-2">
+    <Entrada trigger="scroll" className="grid items-start gap-6 lg:grid-cols-3">
       <Rosca saldos={resumo.saldos}/>
       {despesas.length > 0 && <BarrasCategoria dados={despesas} total={resumo.saldos.despesas}/>}
+      {/* 05 — Pico de gastos: tem fundo próprio, sem .glass. `key` refaz a busca quando algo é salvo pela barra. */}
+      <section aria-labelledby="titulo-pico" className="flex min-w-0 justify-center">
+        <h2 id="titulo-pico" className="sr-only">05 — Pico de gastos</h2>
+        <PicoDeGastos key={versao} maxWidth={400}/>
+      </section>
     </Entrada>
     <Entrada trigger="scroll" className="grid items-start gap-6 lg:grid-cols-2">
       <Painel><Secao n="03" rotulo="Transações recentes" titulo="Transações recentes"/><ListaTransacoes itens={resumo.recentes} rotulo="Transações recentes"/></Painel>

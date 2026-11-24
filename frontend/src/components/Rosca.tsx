@@ -17,9 +17,9 @@ export function Rosca({ saldos }: { saldos: Resumo['saldos'] }) {
   const reduz = useReducedMotion()
   const distribuicao = distribuirDinheiro(saldos)
   const setores = distribuicao.estado === 'valido' ? distribuicao.segmentos.filter(s => s.proporcao > 0) : []
-  return <Painel><Secao n="01" rotulo="Distribuição" titulo="Distribuição do dinheiro"/>
+  return <Painel className="@container"><Secao n="01" rotulo="Distribuição" titulo="Distribuição do dinheiro"/>
     {distribuicao.estado === 'vazio' ? <p className="text-muted">Nenhuma receita registrada para distribuir.</p> :
-    <div className={distribuicao.estado === 'valido' ? 'grid items-center gap-6 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)]' : 'space-y-3'}>
+    <div className={distribuicao.estado === 'valido' ? 'grid items-center gap-6 @lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]' : 'space-y-3'}>
       {distribuicao.estado === 'valido' ? <LimiteGrafico><div className="rosca relative mx-auto h-[250px] w-full max-w-[260px]">
         <motion.div className="absolute inset-0" initial={reduz ? false : { rotate: -70, opacity: 0 }} whileInView={{ rotate: 0, opacity: 1 }}
           viewport={{ once: true }} transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
