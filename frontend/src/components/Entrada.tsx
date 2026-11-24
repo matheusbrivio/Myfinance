@@ -2,6 +2,8 @@ import { Children, type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
 const suave = [0.16, 1, 0.3, 1] as const
+// filter diferente de none num ancestral desliga o backdrop-filter do vidro: limpa ao terminar.
+const nitido = { opacity: 1, y: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none' } }
 
 // Entrada padrão: sobe 18px, sai do blur de 6px até nítido, 0,9s. `agrupar` anima os filhos em sequência.
 export function Entrada({ agrupar = false, trigger = 'mount', delay = 0, className, children }: {
@@ -11,8 +13,8 @@ export function Entrada({ agrupar = false, trigger = 'mount', delay = 0, classNa
   const variante = (atraso: number) => reduz ? {} : ({
     initial: { opacity: 0, y: 18, filter: 'blur(6px)' },
     ...(trigger === 'scroll'
-      ? { whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' }, viewport: { once: true, margin: '0px 0px -8% 0px' } }
-      : { animate: { opacity: 1, y: 0, filter: 'blur(0px)' } }),
+      ? { whileInView: nitido, viewport: { once: true, margin: '0px 0px -8% 0px' } }
+      : { animate: nitido }),
     transition: { duration: 0.9, ease: suave, delay: atraso },
   })
   if (!agrupar) return <motion.div className={className} {...variante(delay)}>{children}</motion.div>

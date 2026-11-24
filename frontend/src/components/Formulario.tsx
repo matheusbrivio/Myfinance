@@ -38,7 +38,7 @@ export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao 
       <button type="button" ref={acionador} className={icone + ' size-11 shrink-0 border border-white/10 bg-black/30'} aria-label="Abrir calendário"
         aria-expanded={aberto} onClick={() => setAberto(!aberto)}><CalendarDays size={18} aria-hidden/></button>
     </div>
-    {aberto && <div className="glass glass-modal absolute left-0 z-30 mt-2 w-[min(18rem,calc(100vw-3rem))] rounded-[20px] p-3" onKeyDown={e => {
+    {aberto && <div className="mt-2 w-full max-w-72 rounded-[20px] border border-white/10 bg-black/30 p-3" onKeyDown={e => {
       if (e.key === 'Escape') { e.stopPropagation(); setAberto(false); acionador.current?.focus() }
     }}>
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -68,7 +68,7 @@ function Segmento({ c, valor, mudar, invalido, descricao }: { c: Campo; valor: s
       {c.opcoes?.map(o => {
         const Icone = o.valor === 'receita' ? ArrowUpRight : o.valor === 'despesa' ? ArrowDownRight : null
         return <label key={o.valor} className="segmento-item">
-          <input type="radio" className="sr-only" name={'campo-' + c.nome} value={o.valor} checked={valor === o.valor}
+          <input type="radio" className="segmento-radio" name={'campo-' + c.nome} value={o.valor} checked={valor === o.valor}
             required={c.obrigatorio} onChange={() => mudar(o.valor)}/>
           {valor === o.valor && <PilulaAtiva id={'segmento-' + id}/>}
           <span className="pilula-texto inline-flex items-center gap-1.5">{Icone && <Icone size={16} aria-hidden/>}{o.rotulo}</span>

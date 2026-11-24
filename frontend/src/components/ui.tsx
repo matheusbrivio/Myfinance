@@ -41,7 +41,7 @@ export function Dialogo({ titulo, aberto, onOpenChange, children }: {
       <DialogPrimitive.Content asChild forceMount>
         <motion.div className="dialogo glass glass-modal fixed inset-0 z-50 m-auto h-fit max-h-[90vh] w-[min(500px,calc(100%-2rem))] overflow-y-auto rounded-[30px] p-7"
           initial={reduz ? { opacity: 0 } : { opacity: 0, scale: 0.97, filter: 'blur(6px)' }}
-          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: reduz ? 0 : 0.35, ease: suave } }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { duration: reduz ? 0 : 0.35, ease: suave }, transitionEnd: { filter: 'none' } }}
           exit={reduz ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.18, ease: 'easeIn' } }}>
           <div className="mb-6 flex items-start justify-between gap-4">
             <DialogPrimitive.Title className="serif text-[34px] leading-tight">{titulo}</DialogPrimitive.Title>

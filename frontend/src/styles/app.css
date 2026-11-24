@@ -35,15 +35,16 @@
 /* Vidro escuro: base de todo painel. */
 .glass {
   background: rgba(9, 12, 20, .58);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  /* Só a propriedade padrão: o Lightning CSS gera o prefixo -webkit-. Escrever as duas fazia o build descartar a padrão. */
+  --vidro: blur(24px) saturate(150%);
+  backdrop-filter: var(--vidro);
   border: 1px solid rgba(255, 255, 255, .09);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 30px 80px -30px rgba(0, 0, 0, .7);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass { background: rgba(9, 12, 20, .88); }
 }
-.glass-modal { background: rgba(9, 12, 20, .62); backdrop-filter: blur(28px) saturate(150%); -webkit-backdrop-filter: blur(28px) saturate(150%); }
+.glass-modal { background: rgba(9, 12, 20, .62); --vidro: blur(28px) saturate(150%); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-modal { background: rgba(9, 12, 20, .88); }
 }
@@ -74,11 +75,14 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
   color: #1A0F06; font-weight: 600; font-size: 15px; white-space: nowrap; box-shadow: 0 10px 30px -10px rgba(240, 178, 122, .6); transition: transform .16s, filter .16s; }
 .cta:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
 .cta:disabled { opacity: .55; }
-@media (max-width: 767px) {
-  .barra { flex-wrap: wrap; padding: 16px 16px 8px; }
+/* Até 1023px os três blocos quebram em linhas; o menu rola na horizontal se faltar espaço. */
+@media (max-width: 1023px) {
+  .barra { flex-wrap: wrap; }
   .menu { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .menu .pilula-item { flex: 1 0 auto; justify-content: center; }
   .cta { margin-left: auto; }
 }
+@media (max-width: 767px) { .barra { padding: 16px 16px 8px; } }
 .pagina { margin: 0 auto; width: 100%; max-width: 1320px; padding: 8px 40px 64px; }
 @media (max-width: 767px) { .pagina { padding: 8px 16px 48px; } }
 
@@ -201,3 +205,4 @@ select.campo option { background: #0b0f17; color: var(--text); }
 .confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; }
 .logo-eletrica { position: relative; display: grid; place-items: center; flex: none; max-width: 100%; }
 .logo-estatica { filter: drop-shadow(0 0 22px rgba(95, 180, 224, .55)); }
+.segmento-radio { position: absolute; inset: 0; z-index: 2; margin: 0; opacity: 0; cursor: pointer; appearance: none; }
