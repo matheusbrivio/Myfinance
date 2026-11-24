@@ -1,9 +1,9 @@
 import type { Resumo } from '../types/financeiro'
 
 const parcelas = [
-  { id: 'disponivel', nome: 'Saldo disponível', cor: '#8FD3F5' },
-  { id: 'despesas', nome: 'Despesas convencionais', cor: '#FF9E8A' },
-  { id: 'reservado', nome: 'Reservado em metas', cor: '#F0B27A' },
+  { id: 'disponivel', nome: 'Saldo disponível', cor: '#2563EB' },
+  { id: 'despesas', nome: 'Despesas convencionais', cor: '#E11D48' },
+  { id: 'reservado', nome: 'Reservado em metas', cor: '#F59E0B' },
 ] as const
 
 function centavos(valor: string) {

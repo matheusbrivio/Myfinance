@@ -19,7 +19,7 @@ export function Esqueleto({ linhas = 4 }: { linhas?: number }) {
       transition={{ duration: 1.4, repeat: Infinity, ease: 'linear', delay: i * 0.08 }}/>)}</div>
 }
 
-const cores = ['#F0B27A', '#FFD3A8', '#8FD3F5', '#7EE2B8', '#F4F6F8']
+const cores = ['#F59E0B', '#FDBA74', '#2563EB', '#059669', '#E11D48']
 // Confetti burst: uma única vez, quando a meta chega a 100%. Posições fixas, sem aleatoriedade em render.
 export function Confete() {
   return <span aria-hidden className="confete">{Array.from({ length: 28 }, (_, i) => {

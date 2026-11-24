@@ -7,10 +7,10 @@ import { Esqueleto, MatrizLoader } from './Efeitos'
 import { Entrada } from './Entrada'
 
 // Botões em pílula: contornado (padrão), claro (principal) e ícone redondo.
-export const botao = 'botao inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-5 h-11 text-sm font-medium text-text hover:bg-white/[.06] disabled:opacity-50'
-export const primario = 'botao inline-flex items-center justify-center gap-2 rounded-full border border-pill bg-pill px-5 h-11 text-sm font-semibold text-[#0B0F17] shadow-[0_6px_24px_-8px_rgba(244,246,248,.5)] hover:bg-white disabled:opacity-50'
-export const icone = 'inline-grid size-9 place-items-center rounded-full text-soft hover:bg-white/[.08] hover:text-text'
-export const campo = 'campo w-full rounded-[14px] border border-white/10 bg-black/30 px-4 h-11 text-[15px] text-text placeholder:text-muted aria-invalid:border-bad'
+export const botao = 'botao inline-flex items-center justify-center gap-2 rounded-full border border-[rgba(15,23,42,.12)] px-5 h-11 text-sm font-medium text-text hover:bg-[rgba(15,23,42,.04)] disabled:opacity-50'
+export const primario = 'botao inline-flex items-center justify-center gap-2 rounded-full border border-ink bg-ink px-5 h-11 text-sm font-semibold text-white shadow-[0_6px_16px_-8px_rgba(15,23,42,.5)] hover:bg-[#1E293B] disabled:opacity-50'
+export const icone = 'inline-grid size-9 place-items-center rounded-full text-soft hover:bg-track hover:text-text'
+export const campo = 'campo w-full rounded-[12px] border border-[rgba(15,23,42,.10)] bg-white/70 px-4 h-11 text-[15px] text-text placeholder:text-muted aria-invalid:border-bad'
 export const painel = 'glass min-w-0 rounded-[26px] p-6'
 
 const suave = [0.16, 1, 0.3, 1] as const
@@ -35,7 +35,7 @@ export function Dialogo({ titulo, aberto, onOpenChange, children }: {
   return <DialogPrimitive.Root open={aberto} onOpenChange={onOpenChange}>
     <AnimatePresence>{aberto && <DialogPrimitive.Portal forceMount>
       <DialogPrimitive.Overlay asChild forceMount>
-        <motion.div className="fixed inset-0 z-40 bg-[rgba(3,5,9,.6)]"
+        <motion.div className="fixed inset-0 z-40 bg-[rgba(15,23,42,.25)] backdrop-blur-[4px]"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduz ? 0 : 0.25 }}/>
       </DialogPrimitive.Overlay>
       <DialogPrimitive.Content asChild forceMount>
@@ -45,7 +45,7 @@ export function Dialogo({ titulo, aberto, onOpenChange, children }: {
           exit={reduz ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.18, ease: 'easeIn' } }}>
           <div className="mb-6 flex items-start justify-between gap-4">
             <DialogPrimitive.Title className="serif text-[34px] leading-tight">{titulo}</DialogPrimitive.Title>
-            <DialogPrimitive.Close className="grid size-10 shrink-0 place-items-center rounded-full border border-white/12 bg-white/5 text-soft hover:bg-white/10 hover:text-text" aria-label="Fechar diálogo"><X size={18}/></DialogPrimitive.Close>
+            <DialogPrimitive.Close className="grid size-10 shrink-0 place-items-center rounded-full border border-line bg-[rgba(15,23,42,.04)] text-soft hover:bg-track hover:text-text" aria-label="Fechar diálogo"><X size={18}/></DialogPrimitive.Close>
           </div>
           <DialogPrimitive.Description className="sr-only">Formulário de {titulo.toLowerCase()}</DialogPrimitive.Description>
           {children}
@@ -61,10 +61,9 @@ function Check() {
   const traco = (atraso: number, duracao: number) => reduz ? {} : {
     initial: { pathLength: 0 }, animate: { pathLength: 1 }, transition: { delay: atraso, duration: duracao, ease: 'easeOut' as const },
   }
-  return <svg className="check" viewBox="0 0 24 24" width="26" height="26" aria-hidden>
-    <motion.circle cx="12" cy="12" r="10" {...traco(0.05, 0.35)}/>
-    <motion.path d="M7.5 12.5l3 3 6-6.5" {...traco(0.3, 0.25)}/>
-  </svg>
+  return <span className="check-circulo" aria-hidden><svg className="check" viewBox="0 0 24 24" width="20" height="20">
+    <motion.path d="M6.5 12.5l3.5 3.5 7.5-8" {...traco(0.1, 0.3)}/>
+  </svg></span>
 }
 
 type Aviso = { id: number; texto: string; tipo: 'sucesso' | 'info' | 'erro'; detalhe?: string; saindo?: boolean }

@@ -35,10 +35,10 @@ export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao 
     <div className="flex gap-2">
       <input id={id} value={valor} onChange={e => mudar(e.target.value)} placeholder="DD/MM/AAAA" className={campo + ' num'}
         aria-invalid={invalido} aria-describedby={descricao} required={obrigatorio} inputMode="numeric"/>
-      <button type="button" ref={acionador} className={icone + ' size-11 shrink-0 border border-white/10 bg-black/30'} aria-label="Abrir calendário"
+      <button type="button" ref={acionador} className={icone + ' size-11 shrink-0 border border-[rgba(15,23,42,.10)] bg-white/70'} aria-label="Abrir calendário"
         aria-expanded={aberto} onClick={() => setAberto(!aberto)}><CalendarDays size={18} aria-hidden/></button>
     </div>
-    {aberto && <div className="mt-2 w-full max-w-72 rounded-[20px] border border-white/10 bg-black/30 p-3" onKeyDown={e => {
+    {aberto && <div className="glass mt-2 w-full max-w-72 rounded-[20px] p-3" onKeyDown={e => {
       if (e.key === 'Escape') { e.stopPropagation(); setAberto(false); acionador.current?.focus() }
     }}>
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -51,7 +51,7 @@ export function Calendario({ id, valor, mudar, invalido, obrigatorio, descricao 
         {Array.from({length: mes.getDay()}, (_, i) => <span key={'v'+i}/>)}
         {Array.from({length: dias}, (_, i) => {
           const data = [i+1, mes.getMonth()+1, mes.getFullYear()].map(n => String(n).padStart(2, '0')).join('/')
-          return <button key={i} type="button" className={'num rounded-full py-1.5 hover:bg-white/10' + (data === valor ? ' bg-pill text-[#0B0F17]' : '')} aria-label={data}
+          return <button key={i} type="button" className={'num rounded-full py-1.5 hover:bg-track' + (data === valor ? ' bg-ink text-white' : '')} aria-label={data}
             onClick={() => { mudar(data); setAberto(false); acionador.current?.focus() }}>{i+1}</button>
         })}
       </div>
@@ -169,7 +169,7 @@ export function Formulario({ campos, inicial = {}, endpoint, method = 'POST', su
       })}
       {method === 'DELETE' ? <div className="grid gap-3 sm:col-span-2">
         <HoldButton key={tentativaExclusao} size="lg" radius={16} holdTime={1200} releaseTime={200}
-          backgroundColor="rgba(255,255,255,0.08)" fillColor="#D9503A" textColor="#FFF4F1" fillTextColor="#FFFFFF"
+          backgroundColor="rgba(15,23,42,0.06)" fillColor="#E11D48" textColor="#0F172A" fillTextColor="#FFFFFF"
           doneLabel={verbo === 'encerrar' ? 'Encerrada' : 'Excluída'} resetAfter={0} disabled={enviando}
           className="w-full" onHold={() => { void enviar() }}>{verbo === 'encerrar' ? 'Segure para encerrar' : 'Segure para excluir'}</HoldButton>
         <p className="text-center text-sm text-muted">Segure por 1,2 s. Soltar antes cancela.</p>

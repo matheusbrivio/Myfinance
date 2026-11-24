@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import LiquidEther from './LiquidEther'
 
-const CORES = ['#1F5F73', '#6FB7D6', '#F0B27A']
+const CORES = ['#93C5FD', '#3B82F6', '#FDBA74']
 const consultas = ['(min-width: 768px)', '(prefers-reduced-motion: reduce)']
 
 function temWebGL2() {
@@ -21,9 +21,9 @@ export function FundoLiquido() {
     return () => ms.forEach(m => m?.removeEventListener('change', mudar))
   }, [])
   return <div className="fundo" aria-hidden>
-    {fluido ? <LiquidEther colors={CORES} intensity={1.1} mouseForce={14} cursorSize={110} persistence={0.8}
-      viscosity={0.25} resolution={0.3} autoDemo autoSpeed={0.25} autoIntensity={1.6} clickBurst={false} intro
-      backgroundColor="#05070C" maxDevicePixelRatio={1.5}/> : <div className="fundo-estatico"/>}
+    {fluido ? <LiquidEther lightMode colors={CORES} intensity={0.9} mouseForce={12} cursorSize={120} persistence={0.8}
+      viscosity={0.3} resolution={0.3} autoDemo autoSpeed={0.2} autoIntensity={1.4} clickBurst={false}
+      backgroundColor="#EEF1F5" maxDevicePixelRatio={1.5}/> : <div className="fundo-estatico"/>}
     <div className="fundo-veu"/>
   </div>
 }
