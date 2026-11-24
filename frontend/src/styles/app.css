@@ -76,10 +76,6 @@ a, button, input, select, textarea { transition: background-color .16s, border-c
 /* Number pop-in */
 .pop { display: inline-block; animation: pop .3s cubic-bezier(.3,1.6,.5,1); }
 @keyframes pop { from { opacity: 0; transform: scale(.85); } }
-/* Texts reveal */
-.reveal-palavra { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .1em; margin-bottom: -.1em; }
-.reveal-palavra > span { display: inline-block; animation: sobe .4s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 60ms); }
-@keyframes sobe { from { transform: translateY(105%); } }
 /* Matrix dot loader */
 .carregando { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--color-muted); font-size: 14px; }
 .matriz { display: inline-grid; grid-template-columns: repeat(3, 5px); gap: 3px; }

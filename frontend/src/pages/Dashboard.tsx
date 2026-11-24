@@ -8,6 +8,7 @@ import { CardMeta } from '../components/CardMeta'
 import { Historico } from '../components/Historico'
 import { Estado, Painel } from '../components/ui'
 import { Numero } from '../components/Numero'
+import { Entrada } from '../components/Entrada'
 import type { Resumo } from '../types/financeiro'
 import { distribuirDinheiro } from '../services/distribuicao'
 
@@ -61,18 +62,18 @@ export function Dashboard() {
   if (!q.data) return <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={3}/>
   const resumo = q.data
   return <div className="space-y-4">
-    <Painel className="hero">
+    <Entrada><Painel className="hero">
       <h2 className="font-mono text-xs uppercase tracking-wider text-muted">Saldo disponível</h2>
       <p className={'mt-2 break-all text-4xl font-semibold tracking-tight sm:text-6xl ' + cor('disponivel', resumo.saldos.disponivel)}><Numero texto={moeda(resumo.saldos.disponivel)}/></p>
-    </Painel>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{secundarios.map(([id, titulo]) => <Painel key={id}>
+    </Painel></Entrada>
+    <Entrada agrupar delay={0.06} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{secundarios.map(([id, titulo]) => <Painel key={id}>
       <h2 className="mb-2 font-mono text-xs uppercase tracking-wider text-muted">{titulo}</h2>
       <p className={'break-all text-xl font-semibold ' + cor(id, resumo.saldos[id])}><Numero texto={moeda(resumo.saldos[id])}/></p>
-    </Painel>)}</div>
-    <Grafico saldos={resumo.saldos}/>
-    <Painel><h2 className="mb-3 text-lg font-semibold">Transações recentes</h2><Historico itens={resumo.recentes}/></Painel>
-    <section><h2 className="mb-3 text-xl font-semibold">Metas financeiras</h2>
-      {resumo.metas.length ? <div className="grid gap-3 lg:grid-cols-2">{resumo.metas.map(meta => <CardMeta key={meta.id} meta={meta}/>)}</div> : <p className="text-muted">Nenhuma meta ativa.</p>}
-    </section>
+    </Painel>)}</Entrada>
+    <Entrada trigger="scroll"><Grafico saldos={resumo.saldos}/></Entrada>
+    <Entrada trigger="scroll"><Painel><h2 className="mb-3 text-lg font-semibold">Transações recentes</h2><Historico itens={resumo.recentes}/></Painel></Entrada>
+    <Entrada trigger="scroll"><section><h2 className="mb-3 text-xl font-semibold">Metas financeiras</h2>
+      {resumo.metas.length ? <Entrada agrupar trigger="scroll" className="grid gap-3 lg:grid-cols-2">{resumo.metas.map(meta => <CardMeta key={meta.id} meta={meta}/>)}</Entrada> : <p className="text-muted">Nenhuma meta ativa.</p>}
+    </section></Entrada>
   </div>
 }

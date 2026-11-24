@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router'
 import { Historico } from '../components/Historico'
 import { Formulario, Calendario, type Campo } from '../components/Formulario'
 import { Abas } from '../components/Abas'
+import { Entrada } from '../components/Entrada'
 import { Dialogo, Estado, Painel, botao, campo, primario } from '../components/ui'
 import { useQuery } from '../hooks/useQuery'
 import { api, todas } from '../services/api'
@@ -19,10 +20,10 @@ export function Categorias() {
   return <>
     <button className={primario + ' mb-4'} onClick={() => setEdicao({ modo: 'novo' })}>Nova categoria</button>
     {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={4}/> :
-      <div className="grid gap-3 sm:grid-cols-2">{q.data.length ? q.data.map(item => <Painel key={item.id}>
+      <Entrada agrupar className="grid gap-3 sm:grid-cols-2">{q.data.length ? q.data.map(item => <Painel key={item.id}>
         <h2 className="break-words font-semibold">{item.nome}</h2><p className="mb-3 break-words text-muted">{item.descricao}</p>
         <Acoes editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>
-      </Painel>) : <p className="text-muted">Nenhuma categoria cadastrada.</p>}</div>}
+      </Painel>) : <p className="text-muted">Nenhuma categoria cadastrada.</p>}</Entrada>}
     <EdicaoRegistro edicao={edicao} titulo={titulo} campos={nomes} recurso="categorias"
       inicial={edicao?.item ? { nome: edicao.item.nome, descricao: edicao.item.descricao } : undefined}
       fechar={() => setEdicao(undefined)} recarregar={q.reload} />
@@ -66,14 +67,14 @@ export function Transacoes() {
   return <>
     <button disabled={!cats.data} className={primario + ' mb-4'} onClick={() => setEdicao({ modo: 'novo' })}>Nova transação</button>
     {cats.error && <Estado carregando={false} erro={cats.error} tentar={cats.reload}/>}
-    <div className="mb-3"><Abas rotulo="Tipo de transação" valor={params.get('tipo') || ''} opcoes={[
+    <Entrada agrupar><div className="mb-3"><Abas rotulo="Tipo de transação" valor={params.get('tipo') || ''} opcoes={[
       { valor: '', rotulo: 'Todas' }, { valor: 'receita', rotulo: 'Receitas' }, { valor: 'despesa', rotulo: 'Despesas' }]}
       mudar={tipo => {
         const novos = new URLSearchParams(params)
         if (tipo) novos.set('tipo', tipo); else novos.delete('tipo')
         novos.delete('pagina'); setParams(novos)
       }}/></div>
-    <Filtros key={chaveFiltros} params={params} opcoes={opcoes} setParams={setParams}/>
+    <Filtros key={chaveFiltros} params={params} opcoes={opcoes} setParams={setParams}/></Entrada>
     {!q.data ? <Estado carregando={q.loading} erro={q.error} tentar={q.reload} linhas={5}/> :
       <Painel><Historico itens={q.data.resultados} acoes={item => <Acoes editar={() => setEdicao({ modo: 'editar', item })} excluir={() => setEdicao({ modo: 'excluir', item })}/>}/>
         <Paginacao pagina={q.data.pagina} total={q.data.total} mudar={pagina => {

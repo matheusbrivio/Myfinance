@@ -1,13 +1,6 @@
 import { useId, useState, type CSSProperties, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 
-// Texts reveal: palavras sobem de uma máscara com atraso escalonado.
-export function TextoReveal({ texto }: { texto: string }) {
-  return <>{texto.split(' ').map((p, i, todas) => <span key={i}>
-    <span className="reveal-palavra"><span style={{ '--i': i } as CSSProperties}>{p}</span></span>{i < todas.length - 1 && ' '}
-  </span>)}</>
-}
-
 // Matrix dot loader: grade 3x3 de pontos com onda diagonal.
 export function MatrizLoader() {
   return <span className="matriz" aria-hidden>{Array.from({ length: 9 }, (_, i) =>
